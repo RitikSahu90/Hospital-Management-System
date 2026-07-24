@@ -1,285 +1,333 @@
 # 🏥 Hospital Management System
 
-## 📌 Project Overview
-
-The Hospital Management System is a full-stack web application developed to digitize and manage hospital operations. The system provides modules for patient management, doctor management, appointments, billing, pharmacy, authentication, and administration.
-
-This project follows Agile (Kanban) methodology using Jira for project management.
+A full-stack, cloud-ready Hospital Management System built as a **modular Spring Boot monolith** with a React frontend, containerized with Docker, and deployable to Kubernetes with CI/CD via GitHub Actions.
 
 ---
 
-# 👥 Team Members & Responsibilities
+## 📖 Table of Contents
 
-## 👨‍💻 Member 1 – Backend Lead
-
-### Responsibilities
-
-- Authentication & Authorization
-- Spring Security
-- JWT
-- REST APIs
-- API Integration
-- Backend Code Review
-- Merge Backend Changes
-
-### Technologies
-
-- Java
-- Spring Boot
-- Spring Security
-- JWT
-- MySQL
-- Maven
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Core Modules](#core-modules)
+- [API Overview](#api-overview)
+- [Database Schema (High Level)](#database-schema-high-level)
+- [Getting Started](#getting-started)
+- [Running with Docker](#running-with-docker)
+- [Deploying to Kubernetes](#deploying-to-kubernetes)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Team Roles](#team-roles)
+- [Roadmap](#roadmap)
 
 ---
 
-## 🎨 Member 2 – Frontend Lead
+## Overview
 
-### Responsibilities
+This system digitizes core hospital operations: patient registration, doctor management, appointment scheduling, billing, and pharmacy inventory — with role-based access control, file/report storage, and BI dashboards.
 
-- React UI Development
-- Dashboard
-- Login/Register Pages
-- Responsive Design
-- API Integration
-- UI Improvements
+For a one-week build, the scope is intentionally layered:
 
-### Technologies
-
-- React.js
-- Bootstrap
-- Axios
-- Chart.js
+| Priority | Component | Approach |
+|---|---|---|
+| ✅ Full implementation | React, Spring Boot, JWT Auth, MySQL, AWS S3, Docker, Kubernetes, GitHub Actions | Core, production-style |
+| ⚙️ Light implementation | FHIR | FHIR-inspired resource endpoints, not a full FHIR server |
+| 📊 Separate track | Power BI | Connected directly to MySQL after core app is stable |
 
 ---
 
-## 👨‍⚕️ Member 3 – Patient & Doctor Module
+## Architecture
 
-### Responsibilities
+```
+                                USER
+                                  │
+                                  │ HTTPS
+                                  ▼
+                     ┌────────────────────────┐
+                     │    React Frontend      │
+                     │  (Bootstrap + Chart.js)│
+                     └────────────┬───────────┘
+                                  │
+                            Axios REST API
+                                  │
+                                  ▼
+                    ┌─────────────────────────┐
+                    │ Spring Boot REST API    │
+                    │ Spring Security + JWT   │
+                    └──────────┬──────────────┘
+                               │
+       ┌───────────────────────┼────────────────────────┐
+       │                       │                        │
+       ▼                       ▼                        ▼
+ Authentication          Business Logic            File Storage
+ (JWT, Roles)      (Patients, Doctors, etc.)         AWS S3
+       │                       │
+       └───────────────┬───────┘
+                        ▼
+                 Spring Data JPA
+                        │
+                        ▼
+                  MySQL Database
+                        │
+                        ▼
+                HL7 FHIR Resources
+                        │
+                        ▼
+                  Power BI Reports
+```
 
-- Patient Management
-- Doctor Management
-- CRUD Operations
-- Search
-- Validation
-- Database Integration
+**Deployment layer:**
 
----
+```
+Docker Containers  →  Kubernetes Cluster
+ ├── Frontend Pod
+ ├── Backend Pod
+ └── MySQL Pod
 
-## 📅 Member 4 – Appointment & Billing
+GitHub → GitHub Actions → Docker Build → Deploy to Kubernetes
+```
 
-### Responsibilities
+**Key principle:** the frontend never talks to the database directly — every request flows through the Spring Boot API.
 
-- Appointment Scheduling
-- Billing
-- Invoice Generation
-- Payment Module
-- Reports
-
----
-
-## 🚀 Member 5 – DevOps & QA
-
-### Responsibilities
-
-- Docker
-- Docker Compose
-- GitHub Actions
-- Testing
-- Documentation
-- Deployment
-- Bug Fixes
-
----
-
-# 📁 Project Structure
-
-backend/
-frontend/
-database/
-docker/
-docs/
-
----
-
-# 🌿 Git Workflow
-
-Every member should create their own feature branch.
-
-Example:
-
-feature/authentication
-
-feature/dashboard
-
-feature/patient-management
-
-feature/appointment
-
-feature/devops
-
-Never work directly on the main branch.
-
-Workflow:
-
-1. Pull latest changes
-2. Create feature branch
-3. Develop feature
-4. Commit changes
-5. Push branch
-6. Create Pull Request
-7. Code Review
-8. Merge into main
+```
+User → React → Axios → Spring Boot API → MySQL / S3
+```
 
 ---
 
-# 📌 Jira Workflow
+## Tech Stack
 
-Backlog
-
-↓
-
-To Do
-
-↓
-
-In Progress
-
-↓
-
-Code Review
-
-↓
-
-Testing
-
-↓
-
-Done
-
-Each Story should move through these stages.
+| Layer | Technology |
+|---|---|
+| Frontend | React.js, Bootstrap, Axios, Chart.js |
+| Backend | Spring Boot, Spring Security, Hibernate/JPA |
+| Auth | JWT, BCrypt |
+| Database | MySQL |
+| File Storage | AWS S3 |
+| Interoperability | FHIR-inspired REST resources |
+| Analytics | Power BI (connected to MySQL) |
+| Containerization | Docker, Docker Compose |
+| Orchestration | Kubernetes (Minikube/Kind for local dev) |
+| CI/CD | GitHub Actions |
 
 ---
 
-# 💻 Development Rules
+## Project Structure
 
-- Follow clean coding principles.
-- Write meaningful commit messages.
-- Keep commits small and focused.
-- Review code before merging.
-- Resolve merge conflicts immediately.
-- Test before creating a Pull Request.
-
----
-
-# 📅 Development Timeline
-
-## Day 1
-
-- Project Setup
-- Repository Setup
-- Environment Configuration
-- Database Setup
-
----
-
-## Day 2–5
-
-Parallel Development
-
-- Backend
-- Frontend
-- Patient Module
-- Appointment Module
-- Docker
-
----
-
-## Day 6
-
-Integration
-
-- Connect Frontend & Backend
-- API Testing
-- Database Validation
-
----
-
-## Day 7
-
-Final Testing
-
-- Bug Fixes
-- Documentation
-- Presentation
-- Final Deployment
+```text
+hospital-management-system/
+│
+├── frontend/                 # React application
+│   ├── src/
+│   │   ├── components/       # Reusable UI components
+│   │   ├── pages/            # Login, Dashboard, Patients, Appointments, Billing, Pharmacy
+│   │   ├── services/         # Axios API clients
+│   │   └── context/          # Auth context, token storage
+│   └── package.json
+│
+├── backend/                  # Spring Boot application
+│   ├── src/main/java/com/hms/
+│   │   ├── config/           # Security, CORS, S3, Swagger config
+│   │   ├── controller/       # REST controllers (Patient, Doctor, Appointment, Billing, Pharmacy, Auth, FHIR)
+│   │   ├── service/          # Business logic
+│   │   ├── repository/       # Spring Data JPA repositories
+│   │   ├── model/            # JPA entities
+│   │   ├── dto/               # Request/response DTOs
+│   │   ├── security/         # JWT filter, provider, roles
+│   │   └── exception/        # Global exception handling
+│   └── pom.xml
+│
+├── database/                  # SQL scripts (schema, seed data, migrations)
+│
+├── docker/                    # Dockerfiles & docker-compose.yml
+│
+├── k8s/                        # Kubernetes manifests
+│   ├── frontend-deployment.yaml
+│   ├── backend-deployment.yaml
+│   ├── mysql-deployment.yaml
+│   ├── frontend-service.yaml
+│   ├── backend-service.yaml
+│   ├── mysql-service.yaml
+│   ├── configmap.yaml
+│   └── secret.yaml
+│
+├── docs/                        # API docs, ERD, user guide
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml               # GitHub Actions pipeline
+│
+└── README.md
+```
 
 ---
 
-# 🛠️ Technology Stack
+## Core Modules
 
-Frontend
-
-- React.js
-- Bootstrap
-- Axios
-- Chart.js
-
-Backend
-
-- Java
-- Spring Boot
-- Spring Security
-- JWT
-
-Database
-
-- MySQL
-
-DevOps
-
-- Docker
-- Docker Compose
-- GitHub Actions
-
-Tools
-
-- Jira
-- GitHub
-- Postman
-- VS Code / IntelliJ IDEA
+| Module | Description |
+|---|---|
+| **Auth** | Login, JWT issuance, role-based access (Admin, Doctor, Receptionist, Patient) |
+| **Patients** | Registration, profile, medical history, report uploads (S3) |
+| **Doctors** | Profiles, specializations, availability |
+| **Appointments** | Booking, rescheduling, status tracking |
+| **Billing** | Invoice generation, payment status |
+| **Pharmacy** | Medicine inventory, stock levels, dispensing |
+| **FHIR Layer** | Simplified `/fhir/Patient/{id}`-style endpoints for interoperability demos |
+| **Reporting** | Power BI dashboards reading directly from MySQL |
 
 ---
 
-# 📌 Coding Standards
+## API Overview
 
-- Follow Java naming conventions.
-- Follow React component structure.
-- Use RESTful API standards.
-- Write reusable components.
-- Avoid duplicate code.
-- Maintain proper folder structure.
+Example endpoints (REST, JSON, JWT-protected unless noted):
+
+```
+POST   /api/auth/login              # Public - returns JWT
+POST   /api/auth/register           # Admin only
+
+GET    /api/patients                # List patients
+POST   /api/patients                # Register patient
+GET    /api/patients/{id}
+POST   /api/patients/{id}/reports   # Upload report → stored in S3, URL saved in MySQL
+
+GET    /api/doctors
+POST   /api/doctors
+
+GET    /api/appointments
+POST   /api/appointments
+PUT    /api/appointments/{id}/status
+
+GET    /api/billing/{patientId}
+POST   /api/billing
+
+GET    /api/pharmacy/medicines
+POST   /api/pharmacy/medicines
+
+GET    /fhir/Patient/{id}           # FHIR-inspired resource format
+```
+
+### Auth flow
+
+```
+User Login → Spring Security → Verify Password (BCrypt) → Generate JWT
+→ Return Token → React stores Token → Future requests include
+Authorization: Bearer <token> → Spring Security validates JWT
+```
+
+### File upload flow
+
+```
+Patient uploads report → Spring Boot → AWS SDK → S3 Bucket
+→ Returns URL → MySQL stores only the URL (not the file)
+```
 
 ---
 
-# 📖 Documentation
+## Database Schema (High Level)
 
-Every completed module must include:
+Core tables (see `database/` for full DDL):
 
-- API Documentation
-- Screenshots
-- Testing Results
-- README Updates
+- `users` (id, username, password_hash, role)
+- `patients` (id, name, dob, contact, report_url, ...)
+- `doctors` (id, name, specialization, availability)
+- `appointments` (id, patient_id, doctor_id, date, status)
+- `bills` (id, patient_id, amount, status, created_at)
+- `medicines` (id, name, stock_quantity, price)
+
+Hibernate maps entities like `Patient.java` directly to the `patients` table via JPA annotations.
 
 ---
 
-# 🎯 Goal
+## Getting Started
 
-Deliver a fully functional Hospital Management System with:
+### Prerequisites
 
-- Secure Authentication
-- Responsive User Interface
-- REST APIs
-- Database Integration
-- Dockerized Deployment
-- Complete Documentation
+- Java 17+, Maven
+- Node.js 18+, npm
+- MySQL 8+
+- AWS account (for S3) — or use a local mock (e.g. LocalStack) for dev
+- Docker & Docker Compose
+- kubectl + Minikube/Kind (for Kubernetes)
+
+### Local setup (without Docker)
+
+```bash
+# Backend
+cd backend
+mvn clean install
+mvn spring-boot:run
+
+# Frontend
+cd frontend
+npm install
+npm start
+```
+
+Set environment variables (`.env` / `application.yml`) for:
+- `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`
+- `JWT_SECRET`
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`
+
+---
+
+## Running with Docker
+
+```bash
+docker-compose up --build
+```
+
+This spins up three containers:
+- `frontend` — React app served via Nginx
+- `backend` — Spring Boot app
+- `mysql` — MySQL database with seed data
+
+---
+
+## Deploying to Kubernetes
+
+```bash
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/secret.yaml
+kubectl apply -f k8s/mysql-deployment.yaml -f k8s/mysql-service.yaml
+kubectl apply -f k8s/backend-deployment.yaml -f k8s/backend-service.yaml
+kubectl apply -f k8s/frontend-deployment.yaml -f k8s/frontend-service.yaml
+```
+
+Kubernetes automatically restarts crashed pods:
+
+```
+Backend Pod → Crash → Kubernetes → Restart Automatically
+```
+
+---
+
+## CI/CD Pipeline
+
+`.github/workflows/ci.yml` runs on every push:
+
+```
+Push Code → GitHub Actions → Build → Run Tests
+→ Build Docker Image → Deploy to Kubernetes
+```
+
+---
+
+## Team Roles
+
+| Member | Focus |
+|---|---|
+| Backend Engineer | Spring Boot, JWT, Security, REST APIs, FHIR endpoints |
+| Frontend Engineer | React, Bootstrap, Dashboard, Axios, Chart.js |
+| Module Developer (1) | Patient module, Doctor module, AWS S3 integration |
+| Module Developer (2) | Appointment, Billing, Pharmacy modules |
+| DevOps Engineer | Docker, Kubernetes, GitHub Actions, testing, documentation, deployment |
+
+---
+
+## Roadmap
+
+- [ ] Add automated test coverage (JUnit + React Testing Library)
+- [ ] Expand FHIR endpoints toward full resource compliance
+- [ ] Add notification service (email/SMS for appointments)
+- [ ] Add audit logging for compliance
+- [ ] Production-grade secrets management (Vault / AWS Secrets Manager)
