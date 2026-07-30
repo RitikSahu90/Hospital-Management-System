@@ -254,19 +254,51 @@ Hibernate maps entities like `Patient.java` directly to the `patients` table via
 ```bash
 # Backend
 cd backend
-mvn clean install
-mvn spring-boot:run
+./gradlew bootRun
 
 # Frontend
 cd frontend
 npm install
-npm start
+npm run dev
 ```
 
-Set environment variables (`.env` / `application.yml`) for:
+The application now uses Spring Boot configuration properties with environment variable overrides.
+
+Set environment variables as needed:
 - `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`
-- `JWT_SECRET`
+- `JWT_SECRET`, `JWT_EXPIRATION_MS`
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`
+- `APP_PROFILE`, `APP_ENVIRONMENT`
+
+Example:
+
+```bash
+export APP_PROFILE=dev
+export DB_URL=jdbc:h2:mem:backenddb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+export DB_USERNAME=sa
+export DB_PASSWORD=
+export JWT_SECRET=local-dev-secret
+export AWS_S3_BUCKET=demo-hospital-bucket
+```
+
+### Production profile
+
+For production deployments, activate the prod profile:
+
+```bash
+export APP_PROFILE=prod
+export SPRING_PROFILES_ACTIVE=prod
+```
+
+This loads [backend/src/main/resources/application-prod.properties](backend/src/main/resources/application-prod.properties) and keeps secrets externalized from source code.
+
+### Future secret-store integration
+
+The configuration is prepared for future integration with:
+- AWS Secrets Manager
+- HashiCorp Vault
+
+These services can override the same environment-backed properties without changing application code.
 
 ---
 

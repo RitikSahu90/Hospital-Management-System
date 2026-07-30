@@ -19,7 +19,7 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "audit_user", nullable = false)
     private String user;
 
     @Column(nullable = false)
