@@ -1,0 +1,277 @@
+================================================================================
+HOW TO RUN THE BACKEND TESTS & API — COMMAND GUIDE
+================================================================================
+
+This file shows all the commands you need to run tests and test the API.
+
+--------------------------------------------------------------------------------
+PREREQUISITES
+--------------------------------------------------------------------------------
+  - Java 17 installed
+  - Gradle wrapper included (./gradlew) — no need to install Gradle separately
+  - Working directory: /home/ritik/Projects/backend
+
+================================================================================
+PART A: RUNNING TESTS
+================================================================================
+
+--------------------------------------------------------------------------------
+STEP 1: OPEN THE BACKEND FOLDER
+--------------------------------------------------------------------------------
+  cd /home/ritik/Projects/backend
+
+--------------------------------------------------------------------------------
+STEP 2: RUN ALL TESTS
+--------------------------------------------------------------------------------
+  ./gradlew test
+
+This compiles the code and runs all 117 tests.
+If everything passes, you will see "BUILD SUCCESSFUL" at the end.
+
+--------------------------------------------------------------------------------
+STEP 3: RUN TESTS WITH COVERAGE REPORT
+--------------------------------------------------------------------------------
+  ./gradlew test jacocoTestReport
+
+This runs all tests AND generates a JaCoCo coverage report.
+
+After it finishes, open the HTML report in your browser:
+  backend/build/reports/jacoco/test/html/index.html
+
+The XML report (for CI tools) is at:
+  backend/build/reports/jacoco/test/jacocoTestReport.xml
+
+--------------------------------------------------------------------------------
+STEP 4: VERIFY COVERAGE MEETS 80% THRESHOLD
+--------------------------------------------------------------------------------
+  ./gradlew jacocoTestCoverageVerification
+
+This checks that line coverage is at least 80%.
+If coverage is below 80%, the build will FAIL.
+Currently, service-layer coverage is 100%, so this will pass.
+
+--------------------------------------------------------------------------------
+STEP 5: RUN A SINGLE TEST CLASS
+--------------------------------------------------------------------------------
+  ./gradlew test --tests 'hospital.management.backend.service.MedicineServiceTest'
+
+Replace the class name with any test class you want to run, for example:
+
+  ./gradlew test --tests 'hospital.management.backend.service.AuthServiceTest'
+  ./gradlew test --tests 'hospital.management.backend.service.PatientServiceTest'
+  ./gradlew test --tests 'hospital.management.backend.service.DoctorServiceTest'
+  ./gradlew test --tests 'hospital.management.backend.service.AppointmentServiceTest'
+  ./gradlew test --tests 'hospital.management.backend.service.BillingServiceTest'
+  ./gradlew test --tests 'hospital.management.backend.service.PrescriptionServiceTest'
+  ./gradlew test --tests 'hospital.management.backend.fhir.FhirServiceTest'
+  ./gradlew test --tests 'hospital.management.backend.audit.AuditLogServiceTest'
+  ./gradlew test --tests 'hospital.management.backend.notification.NotificationServiceTest'
+
+--------------------------------------------------------------------------------
+STEP 6: RUN MULTIPLE TEST CLASSES AT ONCE
+--------------------------------------------------------------------------------
+  ./gradlew test \
+    --tests 'hospital.management.backend.service.AppointmentServiceTest' \
+    --tests 'hospital.management.backend.service.BillingServiceTest'
+
+--------------------------------------------------------------------------------
+STEP 7: RUN A SINGLE TEST METHOD
+--------------------------------------------------------------------------------
+  ./gradlew test --tests 'hospital.management.backend.service.MedicineServiceTest.shouldReduceStock'
+
+Replace with any specific test method name, for example:
+
+  ./gradlew test --tests 'hospital.management.backend.service.AuthServiceTest.shouldLoginSuccessfully'
+  ./gradlew test --tests 'hospital.management.backend.service.AppointmentServiceTest.shouldBookAppointment'
+  ./gradlew test --tests 'hospital.management.backend.service.BillingServiceTest.shouldCreateBilling'
+
+--------------------------------------------------------------------------------
+STEP 8: CLEAN BUILD AND RUN EVERYTHING FROM SCRATCH
+--------------------------------------------------------------------------------
+  ./gradlew clean test jacocoTestReport
+
+This deletes old build artifacts, recompiles everything, runs all tests,
+and generates a fresh coverage report.
+
+================================================================================
+PART B: RUNNING THE APPLICATION & TESTING THE API
+================================================================================
+
+--------------------------------------------------------------------------------
+STEP 9: START THE SPRING BOOT APPLICATION
+--------------------------------------------------------------------------------
+  cd /home/ritik/Projects/backend
+  ./gradlew bootRun
+
+This starts the backend server on port 8080.
+Wait until you see "Started BackendApplication" in the console.
+
+IMPORTANT: Keep this terminal open! The server runs in the foreground.
+Open a NEW terminal for the curl commands below.
+
+--------------------------------------------------------------------------------
+WHY YOU GET 403 IN THE BROWSER
+--------------------------------------------------------------------------------
+If you type http://localhost:8080/api/auth/login in your browser's address
+bar, you will get:
+
+  HTTP ERROR 403 — Access to localhost was denied
+
+This is NORMAL and EXPECTED. Here is why:
+
+  1. The browser sends a GET request.
+  2. The /api/auth/login endpoint only accepts POST requests.
+  3. Spring Security blocks GET requests to POST-only endpoints.
+
+You CANNOT test API endpoints by typing URLs in the browser.
+You MUST use curl, Postman, or a similar API tool.
+
+--------------------------------------------------------------------------------
+STEP 10: TEST THE LOGIN API (using curl)
+--------------------------------------------------------------------------------
+Open a NEW terminal and run:
+
+  curl -X POST http://localhost:8080/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"username":"admin","password":"admin123"}'
+
+Expected response (you get a JWT token):
+  {"token":"eyJhbGciOiJIUzI1NiJ9...","username":"admin"}
+
+--------------------------------------------------------------------------------
+STEP 11: TEST THE REGISTER API (using curl)
+--------------------------------------------------------------------------------
+  curl -X POST http://localhost:8080/api/auth/register \
+    -H "Content-Type: application/json" \
+    -d '{"username":"testuser","email":"test@example.com","password":"test123"}'
+
+Expected response:
+  {"token":"eyJhbGciOiJIUzI1NiJ9...","username":"testuser"}
+
+--------------------------------------------------------------------------------
+STEP 12: USE THE TOKEN TO ACCESS PROTECTED ENDPOINTS
+--------------------------------------------------------------------------------
+First, login and save the token:
+
+  TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"username":"admin","password":"admin123"}' | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
+
+Then use the token to access protected endpoints:
+
+  # Get all patients
+  curl -s http://localhost:8080/api/patients \
+    -H "Authorization: Bearer $TOKEN"
+
+  # Get all doctors
+  curl -s http://localhost:8080/api/doctors \
+    -H "Authorization: Bearer $TOKEN"
+
+  # Get all appointments
+  curl -s http://localhost:8080/api/appointments \
+    -H "Authorization: Bearer $TOKEN"
+
+  # Get all medicines
+  curl -s http://localhost:8080/api/medicines \
+    -H "Authorization: Bearer $TOKEN"
+
+  # Get all billings
+  curl -s http://localhost:8080/api/billings \
+    -H "Authorization: Bearer $TOKEN"
+
+  # Get all prescriptions
+  curl -s http://localhost:8080/api/prescriptions \
+    -H "Authorization: Bearer $TOKEN"
+
+  # Get all audit logs (admin only)
+  curl -s http://localhost:8080/api/audit \
+    -H "Authorization: Bearer $TOKEN"
+
+--------------------------------------------------------------------------------
+STEP 13: TEST FHIR ENDPOINTS (no auth required)
+--------------------------------------------------------------------------------
+FHIR endpoints are public (no token needed):
+
+  # Get patient as FHIR resource
+  curl -s http://localhost:8080/fhir/Patient/1
+
+  # Get practitioner (doctor) as FHIR resource
+  curl -s http://localhost:8080/fhir/Practitioner/1
+
+  # Get appointment as FHIR resource
+  curl -s http://localhost:8080/fhir/Appointment/1
+
+--------------------------------------------------------------------------------
+STEP 14: STOP THE SERVER
+--------------------------------------------------------------------------------
+Go back to the terminal where bootRun is running and press:
+  Ctrl + C
+
+Or from another terminal:
+  pkill -f "spring-boot"
+
+--------------------------------------------------------------------------------
+STEP 15: VIEW TEST RESULTS
+--------------------------------------------------------------------------------
+JUnit XML test results are generated at:
+  backend/build/test-results/test/TEST-*.xml
+
+Each XML file corresponds to one test class and contains:
+  - Number of tests run
+  - Number of failures/errors
+  - Test execution time
+  - Individual test case names and results
+
+================================================================================
+QUICK REFERENCE — ALL COMMANDS
+================================================================================
+  cd /home/ritik/Projects/backend
+
+  # --- Tests ---
+  ./gradlew test                              # Run all tests
+  ./gradlew test jacocoTestReport             # Run tests + coverage report
+  ./gradlew jacocoTestCoverageVerification    # Verify 80% coverage
+  ./gradlew clean test jacocoTestReport       # Clean + tests + coverage
+
+  # Run one test class
+  ./gradlew test --tests 'hospital.management.backend.service.MedicineServiceTest'
+
+  # Run one test method
+  ./gradlew test --tests 'hospital.management.backend.service.MedicineServiceTest.shouldReduceStock'
+
+  # --- Application ---
+  ./gradlew bootRun                           # Start the server (port 8080)
+
+  # --- API Testing (in a NEW terminal while server runs) ---
+  curl -X POST http://localhost:8080/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"username":"admin","password":"admin123"}'
+
+  # --- Coverage report ---
+  open backend/build/reports/jacoco/test/html/index.html
+
+================================================================================
+EXPECTED OUTPUT
+================================================================================
+When all tests pass:
+  > Task :test
+  BUILD SUCCESSFUL in XXs
+
+When the server starts successfully:
+  Started BackendApplication in X.XXX seconds
+
+When login works:
+  {"token":"eyJhbGciOiJIUzI1NiJ9...","username":"admin"}
+
+================================================================================
+TEST SUMMARY
+================================================================================
+  Total tests:    117
+  Failures:       0
+  Errors:         0
+  Skipped:        0
+  Service coverage: 100%
+
+================================================================================
+END OF DOCUMENT
+================================================================================
