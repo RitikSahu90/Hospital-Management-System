@@ -273,5 +273,54 @@ TEST SUMMARY
   Service coverage: 100%
 
 ================================================================================
+ROLE / AUTHORIZATION SUMMARY
+================================================================================
+The backend uses Spring Security with role-based access control.
+Roles are mapped as Spring authorities with the prefix ROLE_.
+
+Available roles used by the controllers:
+  - ADMIN
+  - DOCTOR
+  - RECEPTIONIST
+  - PATIENT
+  - PHARMACIST
+
+Who can access what:
+  - Auth endpoints (/api/auth/**): public
+  - FHIR endpoints (/fhir/**): public
+  - Appointments (/api/appointments):
+      ADMIN, DOCTOR, RECEPTIONIST, PATIENT
+  - Doctors (/api/doctors):
+      ADMIN, RECEPTIONIST for create/update/delete/list/get
+      DOCTOR, PATIENT can view/read only
+  - Patients (/api/patients):
+      ADMIN, RECEPTIONIST, DOCTOR, PATIENT (depending on endpoint)
+  - Medicines (/api/medicines):
+      ADMIN, PHARMACIST
+  - Billings (/api/billings):
+      ADMIN, PHARMACIST
+  - Prescriptions (/api/prescriptions):
+      ADMIN, DOCTOR, PHARMACIST, PATIENT
+  - Audit logs (/api/audit):
+      ADMIN only
+
+How to verify in practice:
+  1. Login with a user that has the role you want to test.
+  2. Copy the returned JWT token.
+  3. Send the token in the Authorization header:
+         Authorization: Bearer <token>
+  4. If the role is allowed, the endpoint returns 200/201.
+     If not, the endpoint returns 403 Forbidden.
+
+Example admin login:
+  curl -X POST http://localhost:8080/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"username":"admin","password":"admin123"}'
+
+Example protected request:
+  curl http://localhost:8080/api/billings \
+    -H "Authorization: Bearer <token>"
+
+================================================================================
 END OF DOCUMENT
 ================================================================================
