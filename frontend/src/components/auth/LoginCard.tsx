@@ -49,10 +49,7 @@ export default function LoginCard() {
         >
           <CardContent sx={{ p: 5 }}>
             <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              mb={4}
+              sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 4 }}
             >
               <Avatar
                 sx={{
@@ -68,7 +65,7 @@ export default function LoginCard() {
 
               <Typography
                 variant="h4"
-                fontWeight={700}
+                sx={{ fontWeight: 700 }}
               >
                 Welcome Back
               </Typography>
@@ -76,7 +73,7 @@ export default function LoginCard() {
               <Typography
                 align="center"
                 color="text.secondary"
-                mt={1}
+                sx={{ mt: 1 }}
               >
                 Sign in to continue managing your hospital.
               </Typography>

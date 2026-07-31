@@ -21,7 +21,7 @@ export default function DoctorAvailability() {
   return (
     <Card sx={{ borderRadius: 4 }}>
       <CardContent>
-        <Typography variant="h6" fontWeight={600} mb={2}>
+        <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
           Doctor Availability
         </Typography>
 

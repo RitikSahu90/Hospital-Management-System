@@ -76,7 +76,7 @@ export default function AddPatientDialog({
       <DialogTitle>Add Patient</DialogTitle>
 
       <DialogContent>
-        <Grid container spacing={2} mt={1}>
+        <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               fullWidth

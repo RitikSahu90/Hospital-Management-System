@@ -101,7 +101,7 @@ export default function Sidebar() {
         }}
       >
         {!collapsed && (
-          <Typography fontWeight={700} fontSize={22}>
+          <Typography sx={{ fontWeight: 700, fontSize: 22 }}>
             Multicare HMS
           </Typography>
         )}
@@ -155,9 +155,11 @@ export default function Sidebar() {
             {!collapsed && (
               <ListItemText
                 primary={item.text}
-                primaryTypographyProps={{
-                  fontSize: 15,
-                  fontWeight: 500,
+                sx={{
+                  "& .MuiListItemText-primary": {
+                    fontSize: 15,
+                    fontWeight: 500,
+                  },
                 }}
               />
             )}
@@ -165,14 +167,11 @@ export default function Sidebar() {
         ))}
       </List>
 
-      <Box flexGrow={1} />
+      <Box sx={{ flexGrow: 1 }} />
 
       {!collapsed && (
         <Typography
-          textAlign="center"
-          mb={2}
-          fontSize={12}
-          color="rgba(255,255,255,.7)"
+          sx={{ textAlign: "center", mb: 2, fontSize: 12, color: "rgba(255,255,255,.7)" }}
         >
           Version 1.0
         </Typography>

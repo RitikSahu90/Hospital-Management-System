@@ -57,11 +57,10 @@ export default function Patients() {
   };
 
   return (
-    <Box p={3}>
+    <Box sx={{ p: 3 }}>
       <Typography
         variant="h4"
-        fontWeight="bold"
-        mb={3}
+        sx={{ fontWeight: "bold", mb: 3 }}
       >
         Patients
       </Typography>

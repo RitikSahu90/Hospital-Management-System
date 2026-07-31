@@ -39,7 +39,7 @@ export default function NotificationPanel() {
       }}
     >
       <CardContent>
-        <Typography variant="h6" fontWeight={600} mb={2}>
+        <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
           Notifications
         </Typography>
 

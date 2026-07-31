@@ -29,7 +29,7 @@ export default function RevenueChart() {
       }}
     >
       <CardContent>
-        <Typography variant="h6" fontWeight={600} mb={2}>
+        <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
           Revenue Overview
         </Typography>
 

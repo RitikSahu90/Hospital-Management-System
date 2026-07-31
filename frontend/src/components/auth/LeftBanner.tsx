@@ -18,10 +18,10 @@ export default function LeftBanner() {
         p: 6,
       }}
     >
-      <Box display="flex" alignItems="center" gap={2}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         <img src={logo} alt="Logo" width={60} />
         <Box>
-          <Typography variant="h5" fontWeight={700}>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
             Multicare HMS
           </Typography>
           <Typography variant="body2">
@@ -31,13 +31,13 @@ export default function LeftBanner() {
       </Box>
 
       <Box>
-        <Typography variant="h2" fontWeight={700}>
+        <Typography variant="h2" sx={{ fontWeight: 700 }}>
           Better Care,
           <br />
           Better Life
         </Typography>
 
-        <Typography mt={3}>
+        <Typography sx={{ mt: 3 }}>
           Manage patients, appointments, doctors, pharmacy,
           laboratory and billing from one secure platform.
         </Typography>

@@ -17,12 +17,12 @@ export default function MedicineStock() {
   return (
     <Card sx={{ borderRadius: 4 }}>
       <CardContent>
-        <Typography variant="h6" fontWeight={600} mb={3}>
+        <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
           Medicine Stock
         </Typography>
 
         {medicines.map((item) => (
-          <Box key={item.name} mb={2}>
+          <Box key={item.name} sx={{ mb: 2 }}>
             <Typography variant="body2">{item.name}</Typography>
 
             <LinearProgress

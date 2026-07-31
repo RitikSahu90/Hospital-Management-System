@@ -25,8 +25,7 @@ export default function DashboardHeader() {
       <Box>
         <Typography
           variant="h4"
-          fontWeight={700}
-          color="#1E3A8A"
+          sx={{ fontWeight: 700, color: "#1E3A8A" }}
         >
           Welcome Back
           <WavingHandIcon
@@ -39,14 +38,13 @@ export default function DashboardHeader() {
         </Typography>
 
         <Typography
-          mt={1}
-          color="text.secondary"
+          sx={{ mt: 1, color: "text.secondary" }}
         >
           Here's what's happening in your hospital today.
         </Typography>
       </Box>
 
-      <Box display="flex" alignItems="center" gap={2}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         <Avatar
           sx={{
             width: 56,
@@ -58,7 +56,7 @@ export default function DashboardHeader() {
         </Avatar>
 
         <Box>
-          <Typography fontWeight={600}>
+          <Typography sx={{ fontWeight: 600 }}>
             Administrator
           </Typography>
 
