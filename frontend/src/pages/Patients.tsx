@@ -1,87 +1,83 @@
-import { useMemo, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 
 import PatientToolbar from "../components/patients/PatientToolbar";
 import PatientTable from "../components/patients/PatientTable";
 import AddPatientDialog from "../components/patients/AddPatientDialog";
 
-import { patients as initialPatients } from "../data/patients";
-import type { Patient } from "../types/patient";
+import { createPatient, getPatients } from "../services/patientService";
+import type { Patient, PatientCreateRequest } from "../types/patient";
 
 export default function Patients() {
-  const [patients, setPatients] = useState<Patient[]>(initialPatients);
-
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [search, setSearch] = useState("");
-
   const [openAdd, setOpenAdd] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadPatients = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getPatients();
+        setPatients(data);
+      } catch (err) {
+        console.error(err);
+        setError("Unable to load patients from the backend.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPatients();
+  }, []);
 
   const filteredPatients = useMemo(() => {
     const keyword = search.toLowerCase();
 
     return patients.filter((patient) =>
-      [
-        patient.patientId,
-        patient.firstName,
-        patient.lastName,
-        patient.phone,
-        patient.doctor,
-        patient.disease,
-        patient.status,
-      ]
+      [patient.firstName, patient.lastName, patient.phone, patient.email, patient.diagnosis]
         .join(" ")
         .toLowerCase()
         .includes(keyword)
     );
   }, [patients, search]);
 
-  const handleAddPatient = (patient: Patient) => {
-    setPatients((prev) => [...prev, patient]);
-  };
-
-  const handleDeletePatient = (patient: Patient) => {
-    if (
-      window.confirm(
-        `Delete ${patient.firstName} ${patient.lastName}?`
-      )
-    ) {
-      setPatients((prev) =>
-        prev.filter((p) => p.id !== patient.id)
-      );
+  const handleAddPatient = async (patient: PatientCreateRequest) => {
+    try {
+      const created = await createPatient(patient);
+      setPatients((prev) => [created, ...prev]);
+      setOpenAdd(false);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to create patient. Please check the form values.");
     }
-  };
-
-  const handleEditPatient = (patient: Patient) => {
-    alert(
-      `Edit feature coming next.\n\nSelected Patient:\n${patient.firstName} ${patient.lastName}`
-    );
   };
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography
-        variant="h4"
-        sx={{ fontWeight: "bold", mb: 3 }}
-      >
+      <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3 }}>
         Patients
       </Typography>
 
-      <PatientToolbar
-        search={search}
-        setSearch={setSearch}
-        onAdd={() => setOpenAdd(true)}
-      />
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-      <PatientTable
-        patients={filteredPatients}
-        onEdit={handleEditPatient}
-        onDelete={handleDeletePatient}
-      />
+      <PatientToolbar search={search} setSearch={setSearch} onAdd={() => setOpenAdd(true)} />
 
-      <AddPatientDialog
-        open={openAdd}
-        onClose={() => setOpenAdd(false)}
-        onSave={handleAddPatient}
-      />
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <PatientTable patients={filteredPatients} />
+      )}
+
+      <AddPatientDialog open={openAdd} onClose={() => setOpenAdd(false)} onSave={handleAddPatient} />
     </Box>
   );
 }
