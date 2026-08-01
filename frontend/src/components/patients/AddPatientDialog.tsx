@@ -18,10 +18,15 @@ interface Props {
 }
 
 const emptyPatient: PatientCreateRequest = {
+  patientNumber: "",
   firstName: "",
   lastName: "",
   email: "",
   phone: "",
+  dateOfBirth: "",
+  gender: "OTHER",
+  address: "",
+  bloodGroup: "",
   diagnosis: "",
 };
 
@@ -51,6 +56,7 @@ export default function AddPatientDialog({
 
       <DialogContent>
         <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth label="Patient Number" name="patientNumber" value={patient.patientNumber} onChange={handleChange} required /></Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <TextField fullWidth label="First Name" name="firstName" value={patient.firstName} onChange={handleChange} />
           </Grid>
@@ -66,6 +72,11 @@ export default function AddPatientDialog({
           <Grid size={{ xs: 12, md: 6 }}>
             <TextField fullWidth label="Email" name="email" value={patient.email} onChange={handleChange} />
           </Grid>
+
+          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth label="Date of Birth" name="dateOfBirth" type="date" value={patient.dateOfBirth} onChange={handleChange} slotProps={{ inputLabel: { shrink: true } }} required /></Grid>
+          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth select label="Gender" name="gender" value={patient.gender} onChange={handleChange} slotProps={{ select: { native: true } }}><option value="MALE">Male</option><option value="FEMALE">Female</option><option value="OTHER">Other</option></TextField></Grid>
+          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth label="Blood Group" name="bloodGroup" value={patient.bloodGroup} onChange={handleChange} /></Grid>
+          <Grid size={{ xs: 12 }}><TextField fullWidth label="Address" name="address" value={patient.address} onChange={handleChange} /></Grid>
 
           <Grid size={{ xs: 12 }}>
             <TextField fullWidth label="Diagnosis" name="diagnosis" value={patient.diagnosis} onChange={handleChange} />

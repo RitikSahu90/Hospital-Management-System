@@ -5,16 +5,19 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import hospital.management.backend.enums.BillingStatus;
 
 @Data
 @AllArgsConstructor
 public class BillingResponse {
     private Long id;
     private Long patientId;
-    private Long prescriptionId;
+    private Long appointmentId;
+    private BigDecimal consultationFee;
+    private BigDecimal medicineCharges;
+    private BigDecimal otherCharges;
     private BigDecimal totalAmount;
     private BigDecimal paidAmount;
     private BigDecimal dueAmount;
-    private LocalDate billingDate;
-    private Boolean paid;
+    private BillingStatus status;
 }

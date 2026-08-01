@@ -1,12 +1,8 @@
 package hospital.management.backend.controller;
 
-import hospital.management.backend.entity.Doctor;
 import hospital.management.backend.entity.Patient;
-import hospital.management.backend.entity.Prescription;
 import hospital.management.backend.repository.BillingRepository;
 import hospital.management.backend.repository.PatientRepository;
-import hospital.management.backend.repository.PrescriptionRepository;
-import hospital.management.backend.repository.DoctorRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,46 +31,25 @@ class BillingControllerIntegrationTest {
     @Autowired
     private PatientRepository patientRepository;
 
-    @Autowired
-    private DoctorRepository doctorRepository;
-
-    @Autowired
-    private PrescriptionRepository prescriptionRepository;
-
     @BeforeEach
     void setUp() {
         billingRepository.deleteAll();
         patientRepository.deleteAll();
-        prescriptionRepository.deleteAll();
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void shouldCreateBillingAndPersist() throws Exception {
         Patient patient = new Patient();
+        patient.setPatientNumber("P-BILL-1");
         patient.setFirstName("John");
         patient.setLastName("Doe");
+        patient.setDateOfBirth(java.time.LocalDate.of(1990, 1, 1));
+        patient.setGender(hospital.management.backend.enums.Gender.MALE);
         patient.setEmail("john@example.com");
+        patient.setPhone("9999999999");
         patient = patientRepository.save(patient);
-
-        Doctor doctor = new Doctor();
-        doctor.setFirstName("Jane");
-        doctor.setLastName("Smith");
-        doctor.setLicenseNumber("LIC789");
-        doctor.setSpecialization("General Practice");
-        doctor = doctorRepository.save(doctor);
-
-        Prescription prescription = new Prescription();
-        prescription.setPatient(patient);
-        prescription.setDoctor(doctor);
-        prescription.setMedicineName("Amoxicillin");
-        prescription.setDosage("500mg");
-        prescription.setFrequency("Twice a day");
-        prescription.setDurationDays(7);
-        prescription.setPrescribedDate(LocalDate.now());
-        prescription = prescriptionRepository.save(prescription);
-
-        String json = "{\"patientId\":" + patient.getId() + ",\"prescriptionId\":" + prescription.getId() + ",\"totalAmount\":100.0,\"paidAmount\":80.0,\"billingDate\":\"" + LocalDate.now() + "\"}";
+        String json = "{\"patientId\":" + patient.getId() + ",\"consultationFee\":100.0,\"medicineCharges\":0.0,\"otherCharges\":0.0}";
 
         mockMvc.perform(post("/api/billings")
                         .contentType(MediaType.APPLICATION_JSON)

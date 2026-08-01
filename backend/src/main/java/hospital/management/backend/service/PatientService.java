@@ -17,12 +17,28 @@ public class PatientService {
         return patientRepository.findAll().stream()
                 .map(patient -> new PatientResponse(
                         patient.getId(),
+                        patient.getPatientNumber(),
                         patient.getFirstName(),
                         patient.getLastName(),
                         patient.getEmail(),
                         patient.getPhone(),
-                        patient.getDiagnosis()))
+                        patient.getDateOfBirth(),
+                        patient.getGender(),
+                        patient.getAddress(),
+                        patient.getBloodGroup()))
                 .toList();
+    }
+
+    public PatientResponse findForUsername(String username) {
+        Patient patient = patientRepository.findByUserUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Patient profile not found"));
+        return toResponse(patient);
+    }
+
+    public boolean belongsToUser(Long patientId, String username) {
+        return patientRepository.findById(patientId)
+                .map(patient -> patient.getUser() != null && patient.getUser().getUsername().equals(username))
+                .orElse(false);
     }
 
     public PatientResponse create(Patient patient) {
@@ -37,7 +53,11 @@ public class PatientService {
         existing.setLastName(patient.getLastName());
         existing.setEmail(patient.getEmail());
         existing.setPhone(patient.getPhone());
-        existing.setDiagnosis(patient.getDiagnosis());
+        existing.setPatientNumber(patient.getPatientNumber());
+        existing.setDateOfBirth(patient.getDateOfBirth());
+        existing.setGender(patient.getGender());
+        existing.setAddress(patient.getAddress());
+        existing.setBloodGroup(patient.getBloodGroup());
         return toResponse(patientRepository.save(existing));
     }
 
@@ -51,10 +71,14 @@ public class PatientService {
     private PatientResponse toResponse(Patient saved) {
         return new PatientResponse(
                 saved.getId(),
+                saved.getPatientNumber(),
                 saved.getFirstName(),
                 saved.getLastName(),
                 saved.getEmail(),
                 saved.getPhone(),
-                saved.getDiagnosis());
+                saved.getDateOfBirth(),
+                saved.getGender(),
+                saved.getAddress(),
+                saved.getBloodGroup());
     }
 }

@@ -12,17 +12,17 @@ public class BillingRequest {
     @NotNull
     private Long patientId;
 
-    @NotNull
-    private Long prescriptionId;
-
-    @NotNull
-    @DecimalMin(value = "0.0", inclusive = false)
-    private BigDecimal totalAmount;
+    private Long appointmentId;
 
     @NotNull
     @DecimalMin(value = "0.0", inclusive = true)
-    private BigDecimal paidAmount;
+    private BigDecimal consultationFee;
 
     @NotNull
-    private LocalDate billingDate;
+    @DecimalMin(value = "0.0", inclusive = true)
+    private BigDecimal medicineCharges;
+
+    @NotNull
+    @DecimalMin(value = "0.0", inclusive = true)
+    private BigDecimal otherCharges;
 }

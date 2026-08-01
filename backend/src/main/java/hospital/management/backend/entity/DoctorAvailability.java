@@ -1,7 +1,7 @@
 package hospital.management.backend.entity;
 
+import hospital.management.backend.enums.AvailabilityDay;
 import jakarta.persistence.*;
-
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
@@ -16,8 +16,9 @@ public class DoctorAvailability {
     @JoinColumn(name = "doctor_id")
     private Doctor doctor;
 
-    @Column(nullable = false)
-    private DayOfWeek dayOfWeek;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "day_of_week", nullable = false)
+    private AvailabilityDay dayOfWeek;
 
     @Column(nullable = false)
     private LocalTime startTime;
@@ -28,7 +29,7 @@ public class DoctorAvailability {
     public DoctorAvailability() {
     }
 
-    public DoctorAvailability(Long id, Doctor doctor, DayOfWeek dayOfWeek, LocalTime startTime, LocalTime endTime) {
+    public DoctorAvailability(Long id, Doctor doctor, AvailabilityDay dayOfWeek, LocalTime startTime, LocalTime endTime) {
         this.id = id;
         this.doctor = doctor;
         this.dayOfWeek = dayOfWeek;
@@ -52,12 +53,16 @@ public class DoctorAvailability {
         this.doctor = doctor;
     }
 
-    public DayOfWeek getDayOfWeek() {
+    public AvailabilityDay getDayOfWeek() {
         return dayOfWeek;
     }
 
-    public void setDayOfWeek(DayOfWeek dayOfWeek) {
+    public void setDayOfWeek(AvailabilityDay dayOfWeek) {
         this.dayOfWeek = dayOfWeek;
+    }
+
+    public void setDayOfWeek(DayOfWeek dayOfWeek) {
+        this.dayOfWeek = AvailabilityDay.valueOf(dayOfWeek.name().substring(0, 3));
     }
 
     public LocalTime getStartTime() {

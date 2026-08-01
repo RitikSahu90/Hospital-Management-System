@@ -6,9 +6,12 @@ import hospital.management.backend.dto.response.AvailabilityResponse;
 import hospital.management.backend.dto.response.DoctorResponse;
 import hospital.management.backend.entity.Doctor;
 import hospital.management.backend.entity.DoctorAvailability;
+import hospital.management.backend.entity.Department;
 import hospital.management.backend.mapper.DoctorMapper;
 import hospital.management.backend.repository.DoctorAvailabilityRepository;
 import hospital.management.backend.repository.DoctorRepository;
+import hospital.management.backend.repository.DepartmentRepository;
+import hospital.management.backend.repository.UserRepository;
 import hospital.management.backend.service.DoctorService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,17 +24,25 @@ import java.util.stream.Collectors;
 public class DoctorServiceImpl implements DoctorService {
     private final DoctorRepository doctorRepository;
     private final DoctorAvailabilityRepository availabilityRepository;
+    private final DepartmentRepository departmentRepository;
+    private final UserRepository userRepository;
     private final DoctorMapper mapper;
 
-    public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorAvailabilityRepository availabilityRepository, DoctorMapper mapper) {
+    public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorAvailabilityRepository availabilityRepository, DepartmentRepository departmentRepository, UserRepository userRepository, DoctorMapper mapper) {
         this.doctorRepository = doctorRepository;
         this.availabilityRepository = availabilityRepository;
+        this.departmentRepository = departmentRepository;
+        this.userRepository = userRepository;
         this.mapper = mapper;
     }
 
     @Override
     public DoctorResponse create(DoctorRequest request) {
         Doctor d = mapper.toEntity(request);
+        d.setDepartment(departmentRepository.findById(request.getDepartmentId())
+            .orElseThrow(() -> new IllegalArgumentException("Department not found")));
+        d.setUser(userRepository.findById(request.getUserId())
+            .orElseThrow(() -> new IllegalArgumentException("User not found")));
         Doctor saved = doctorRepository.save(d);
         return mapper.toResponse(saved);
     }
@@ -45,6 +56,13 @@ public class DoctorServiceImpl implements DoctorService {
         existing.setSpecialization(request.getSpecialization());
         existing.setPhone(request.getPhone());
         existing.setConsultationFee(request.getConsultationFee());
+        existing.setDoctorCode(request.getDoctorCode());
+        existing.setYearsExperience(request.getYearsExperience());
+        existing.setStatus(request.getStatus());
+        existing.setDepartment(departmentRepository.findById(request.getDepartmentId())
+            .orElseThrow(() -> new IllegalArgumentException("Department not found")));
+        existing.setUser(userRepository.findById(request.getUserId())
+            .orElseThrow(() -> new IllegalArgumentException("User not found")));
         Doctor saved = doctorRepository.save(existing);
         return mapper.toResponse(saved);
     }
@@ -83,5 +101,27 @@ public class DoctorServiceImpl implements DoctorService {
         return availabilityRepository.findByDoctor(doctor).stream()
                 .map(a -> new AvailabilityResponse(a.getId(), doctor.getId(), a.getDayOfWeek(), a.getStartTime(), a.getEndTime()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public AvailabilityResponse updateAvailability(Long doctorId, Long availabilityId, AvailabilityRequest request) {
+        Doctor doctor = doctorRepository.findById(doctorId).orElseThrow(() -> new IllegalArgumentException("Doctor not found"));
+        DoctorAvailability availability = availabilityRepository.findById(availabilityId)
+                .filter(item -> item.getDoctor().getId().equals(doctor.getId()))
+                .orElseThrow(() -> new IllegalArgumentException("Availability not found"));
+        availability.setDayOfWeek(request.getDayOfWeek());
+        availability.setStartTime(request.getStartTime());
+        availability.setEndTime(request.getEndTime());
+        DoctorAvailability saved = availabilityRepository.save(availability);
+        return new AvailabilityResponse(saved.getId(), doctor.getId(), saved.getDayOfWeek(), saved.getStartTime(), saved.getEndTime());
+    }
+
+    @Override
+    public void deleteAvailability(Long doctorId, Long availabilityId) {
+        Doctor doctor = doctorRepository.findById(doctorId).orElseThrow(() -> new IllegalArgumentException("Doctor not found"));
+        DoctorAvailability availability = availabilityRepository.findById(availabilityId)
+                .filter(item -> item.getDoctor().getId().equals(doctor.getId()))
+                .orElseThrow(() -> new IllegalArgumentException("Availability not found"));
+        availabilityRepository.delete(availability);
     }
 }

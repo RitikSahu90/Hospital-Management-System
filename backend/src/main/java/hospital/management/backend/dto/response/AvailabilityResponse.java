@@ -1,19 +1,19 @@
 package hospital.management.backend.dto.response;
 
-import java.time.DayOfWeek;
+import hospital.management.backend.enums.AvailabilityDay;
 import java.time.LocalTime;
 
 public class AvailabilityResponse {
     private Long id;
     private Long doctorId;
-    private DayOfWeek dayOfWeek;
+    private AvailabilityDay dayOfWeek;
     private LocalTime startTime;
     private LocalTime endTime;
 
     public AvailabilityResponse() {
     }
 
-    public AvailabilityResponse(Long id, Long doctorId, DayOfWeek dayOfWeek, LocalTime startTime, LocalTime endTime) {
+    public AvailabilityResponse(Long id, Long doctorId, AvailabilityDay dayOfWeek, LocalTime startTime, LocalTime endTime) {
         this.id = id;
         this.doctorId = doctorId;
         this.dayOfWeek = dayOfWeek;
@@ -37,11 +37,11 @@ public class AvailabilityResponse {
         this.doctorId = doctorId;
     }
 
-    public DayOfWeek getDayOfWeek() {
+    public AvailabilityDay getDayOfWeek() {
         return dayOfWeek;
     }
 
-    public void setDayOfWeek(DayOfWeek dayOfWeek) {
+    public void setDayOfWeek(AvailabilityDay dayOfWeek) {
         this.dayOfWeek = dayOfWeek;
     }
 

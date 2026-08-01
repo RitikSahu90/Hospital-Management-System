@@ -21,7 +21,6 @@ import EventNoteIcon from "@mui/icons-material/EventNote";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import MedicationIcon from "@mui/icons-material/Medication";
 import ScienceIcon from "@mui/icons-material/Science";
-import SettingsIcon from "@mui/icons-material/Settings";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import MenuIcon from "@mui/icons-material/Menu";
 
@@ -44,6 +43,8 @@ const menuItems = [
     path: "/doctors",
     icon: <LocalHospitalIcon />,
   },
+  { text: "Departments", path: "/departments", icon: <LocalHospitalIcon /> },
+  { text: "Availability", path: "/availability", icon: <EventNoteIcon /> },
   {
     text: "Appointments",
     path: "/appointments",
@@ -64,11 +65,9 @@ const menuItems = [
     path: "/laboratory",
     icon: <ScienceIcon />,
   },
-  {
-    text: "Settings",
-    path: "/settings",
-    icon: <SettingsIcon />,
-  },
+  { text: "Medical Records", path: "/medical-records", icon: <ScienceIcon /> },
+  { text: "Suppliers", path: "/suppliers", icon: <MedicationIcon /> },
+  { text: "Payments", path: "/payments", icon: <ReceiptLongIcon /> },
 ];
 
 export default function Sidebar() {

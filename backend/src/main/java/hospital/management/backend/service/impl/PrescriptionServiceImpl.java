@@ -1,14 +1,18 @@
 package hospital.management.backend.service.impl;
 
 import hospital.management.backend.dto.request.PrescriptionRequest;
+import hospital.management.backend.dto.request.PrescriptionItemRequest;
 import hospital.management.backend.dto.response.PrescriptionResponse;
 import hospital.management.backend.entity.Doctor;
 import hospital.management.backend.entity.Patient;
 import hospital.management.backend.entity.Prescription;
+import hospital.management.backend.entity.PrescriptionItem;
 import hospital.management.backend.mapper.PrescriptionMapper;
 import hospital.management.backend.repository.DoctorRepository;
 import hospital.management.backend.repository.PatientRepository;
 import hospital.management.backend.repository.PrescriptionRepository;
+import hospital.management.backend.repository.MedicalRecordRepository;
+import hospital.management.backend.repository.MedicineRepository;
 import hospital.management.backend.service.PrescriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +29,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
     private final PrescriptionMapper prescriptionMapper;
+        private final MedicalRecordRepository medicalRecordRepository;
+        private final MedicineRepository medicineRepository;
 
     @Override
     public PrescriptionResponse create(PrescriptionRequest request) {
@@ -36,6 +42,9 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         Prescription prescription = prescriptionMapper.toEntity(request);
         prescription.setPatient(patient);
         prescription.setDoctor(doctor);
+        prescription.setMedicalRecord(medicalRecordRepository.findById(request.getMedicalRecordId())
+                .orElseThrow(() -> new IllegalArgumentException("Medical record not found")));
+        setItems(prescription, request);
 
         Prescription saved = prescriptionRepository.save(prescription);
         return prescriptionMapper.toResponse(saved);
@@ -52,11 +61,10 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         prescription.setPatient(patient);
         prescription.setDoctor(doctor);
-        prescription.setMedicineName(request.getMedicineName());
-        prescription.setDosage(request.getDosage());
-        prescription.setFrequency(request.getFrequency());
-        prescription.setDurationDays(request.getDurationDays());
-        prescription.setPrescribedDate(request.getPrescribedDate());
+        prescription.setMedicalRecord(medicalRecordRepository.findById(request.getMedicalRecordId())
+                .orElseThrow(() -> new IllegalArgumentException("Medical record not found")));
+        prescription.getItems().clear();
+        setItems(prescription, request);
         prescription.setNotes(request.getNotes());
 
         Prescription saved = prescriptionRepository.save(prescription);
@@ -81,4 +89,17 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                 .map(prescriptionMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
+        private void setItems(Prescription prescription, PrescriptionRequest request) {
+                for (PrescriptionItemRequest itemRequest : request.getItems()) {
+                        PrescriptionItem item = new PrescriptionItem();
+                        item.setPrescription(prescription);
+                        item.setMedicine(medicineRepository.findById(itemRequest.getMedicineId())
+                                        .orElseThrow(() -> new IllegalArgumentException("Medicine not found")));
+                        item.setDosage(itemRequest.getDosage());
+                        item.setDurationDays(itemRequest.getDurationDays());
+                        item.setQuantity(itemRequest.getQuantity());
+                        prescription.getItems().add(item);
+                }
+        }
 }

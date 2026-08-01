@@ -1,5 +1,6 @@
 package hospital.management.backend.entity;
 
+import hospital.management.backend.enums.BillingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,9 +9,10 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Instant;
 
 @Entity
-@Table(name = "billings")
+@Table(name = "bills")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,22 +26,34 @@ public class Billing {
     @JoinColumn(name = "patient_id")
     private Patient patient;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "prescription_id")
-    private Prescription prescription;
+    @ManyToOne
+    @JoinColumn(name = "appointment_id")
+    private Appointment appointment;
 
-    @Column(nullable = false)
+    @Column(name = "consultation_fee", nullable = false)
+    @Builder.Default private BigDecimal consultationFee = BigDecimal.ZERO;
+
+    @Column(name = "medicine_charges", nullable = false)
+    @Builder.Default private BigDecimal medicineCharges = BigDecimal.ZERO;
+
+    @Column(name = "other_charges", nullable = false)
+    @Builder.Default private BigDecimal otherCharges = BigDecimal.ZERO;
+
+    @Column(name = "total_amount", insertable = false, updatable = false)
     private BigDecimal totalAmount;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private BigDecimal paidAmount;
+    @Builder.Default private BillingStatus status = BillingStatus.PENDING;
 
-    @Column(nullable = false)
-    private BigDecimal dueAmount;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
-    @Column(nullable = false)
-    private LocalDate billingDate;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
-    @Column(nullable = false)
-    private Boolean paid;
+    @PrePersist
+    void onCreate() { Instant now = Instant.now(); createdAt = now; updatedAt = now; }
+    @PreUpdate
+    void onUpdate() { updatedAt = Instant.now(); }
 }

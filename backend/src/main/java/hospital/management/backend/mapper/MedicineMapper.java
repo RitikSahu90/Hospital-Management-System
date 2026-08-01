@@ -3,6 +3,7 @@ package hospital.management.backend.mapper;
 import hospital.management.backend.dto.request.MedicineRequest;
 import hospital.management.backend.dto.response.MedicineResponse;
 import hospital.management.backend.entity.Medicine;
+import hospital.management.backend.entity.Inventory;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,19 +13,21 @@ public class MedicineMapper {
                 .name(request.getName())
                 .manufacturer(request.getManufacturer())
                 .unitPrice(request.getUnitPrice())
-                .stockQuantity(request.getStockQuantity())
-                .expiryDate(request.getExpiryDate())
                 .build();
     }
 
     public MedicineResponse toResponse(Medicine medicine) {
+        return toResponse(medicine, null);
+    }
+
+    public MedicineResponse toResponse(Medicine medicine, Inventory inventory) {
         return new MedicineResponse(
                 medicine.getId(),
                 medicine.getName(),
                 medicine.getManufacturer(),
                 medicine.getUnitPrice(),
-                medicine.getStockQuantity(),
-                medicine.getExpiryDate()
+                inventory == null ? null : inventory.getStockQuantity(),
+                inventory == null ? null : inventory.getExpiryDate()
         );
     }
 }

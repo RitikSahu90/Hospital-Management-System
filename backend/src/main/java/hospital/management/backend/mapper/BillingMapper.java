@@ -5,28 +5,27 @@ import hospital.management.backend.dto.response.BillingResponse;
 import hospital.management.backend.entity.Billing;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 @Component
 public class BillingMapper {
     public Billing toEntity(BillingRequest request) {
         return Billing.builder()
-                .totalAmount(request.getTotalAmount())
-                .paidAmount(request.getPaidAmount())
-                .dueAmount(request.getTotalAmount().subtract(request.getPaidAmount()))
-                .billingDate(request.getBillingDate())
-                .paid(request.getPaidAmount().compareTo(request.getTotalAmount()) >= 0)
+                .consultationFee(request.getConsultationFee())
+                .medicineCharges(request.getMedicineCharges())
+                .otherCharges(request.getOtherCharges())
                 .build();
     }
 
-    public BillingResponse toResponse(Billing billing) {
+    public BillingResponse toResponse(Billing billing, BigDecimal paidAmount) {
+        BigDecimal paid = paidAmount == null ? BigDecimal.ZERO : paidAmount;
+        BigDecimal total = billing.getTotalAmount() == null ? BigDecimal.ZERO : billing.getTotalAmount();
         return new BillingResponse(
                 billing.getId(),
                 billing.getPatient().getId(),
-                billing.getPrescription().getId(),
-                billing.getTotalAmount(),
-                billing.getPaidAmount(),
-                billing.getDueAmount(),
-                billing.getBillingDate(),
-                billing.getPaid()
+                billing.getAppointment() == null ? null : billing.getAppointment().getId(),
+                billing.getConsultationFee(), billing.getMedicineCharges(), billing.getOtherCharges(), total,
+                paid, total.subtract(paid), billing.getStatus()
         );
     }
 }

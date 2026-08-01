@@ -16,7 +16,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -40,10 +39,10 @@ class BillingControllerTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void shouldCreateBilling() throws Exception {
-        BillingResponse response = new BillingResponse(1L, 1L, 2L, BigDecimal.valueOf(100.0), BigDecimal.valueOf(80.0), BigDecimal.valueOf(20.0), LocalDate.now(), false);
+        BillingResponse response = new BillingResponse(1L, 1L, null, BigDecimal.valueOf(100.0), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.valueOf(100.0), BigDecimal.ZERO, BigDecimal.valueOf(100.0), hospital.management.backend.enums.BillingStatus.PENDING);
         Mockito.when(billingService.create(Mockito.any(BillingRequest.class))).thenReturn(response);
 
-        String json = "{\"patientId\":1,\"prescriptionId\":2,\"totalAmount\":100.0,\"paidAmount\":80.0,\"billingDate\":\"" + LocalDate.now() + "\"}";
+        String json = "{\"patientId\":1,\"consultationFee\":100.0,\"medicineCharges\":0.0,\"otherCharges\":0.0}";
 
         mockMvc.perform(post("/api/billings")
                         .contentType(MediaType.APPLICATION_JSON)

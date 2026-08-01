@@ -1,5 +1,6 @@
 package hospital.management.backend.dto.request;
 
+import hospital.management.backend.enums.AvailabilityDay;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.DayOfWeek;
@@ -7,7 +8,7 @@ import java.time.LocalTime;
 
 public class AvailabilityRequest {
     @NotNull
-    private DayOfWeek dayOfWeek;
+    private AvailabilityDay dayOfWeek;
 
     @NotNull
     private LocalTime startTime;
@@ -18,12 +19,16 @@ public class AvailabilityRequest {
     public AvailabilityRequest() {
     }
 
-    public DayOfWeek getDayOfWeek() {
+    public AvailabilityDay getDayOfWeek() {
         return dayOfWeek;
     }
 
-    public void setDayOfWeek(DayOfWeek dayOfWeek) {
+    public void setDayOfWeek(AvailabilityDay dayOfWeek) {
         this.dayOfWeek = dayOfWeek;
+    }
+
+    public void setDayOfWeek(DayOfWeek dayOfWeek) {
+        this.dayOfWeek = AvailabilityDay.valueOf(dayOfWeek.name().substring(0, 3));
     }
 
     public LocalTime getStartTime() {

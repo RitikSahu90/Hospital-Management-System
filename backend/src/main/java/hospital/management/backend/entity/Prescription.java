@@ -7,6 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "prescriptions")
@@ -27,20 +30,23 @@ public class Prescription {
     @JoinColumn(name = "doctor_id")
     private Doctor doctor;
 
-    @Column(nullable = false)
-    private String medicineName;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "medical_record_id", nullable = false)
+    private MedicalRecord medicalRecord;
 
-    @Column(nullable = false)
-    private String dosage;
-
-    @Column(nullable = false)
-    private String frequency;
-
-    @Column(nullable = false)
-    private Integer durationDays;
-
-    @Column(nullable = false)
-    private LocalDate prescribedDate;
+    @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PrescriptionItem> items = new ArrayList<>();
 
     private String notes;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    void onCreate() { Instant now = Instant.now(); createdAt = now; updatedAt = now; }
+    @PreUpdate
+    void onUpdate() { updatedAt = Instant.now(); }
 }

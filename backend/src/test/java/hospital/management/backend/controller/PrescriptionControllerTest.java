@@ -15,7 +15,7 @@ import hospital.management.backend.security.JwtAuthenticationFilter;
 import hospital.management.backend.security.jwt.JwtUtil;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDate;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -39,10 +39,10 @@ class PrescriptionControllerTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void shouldCreatePrescription() throws Exception {
-        PrescriptionResponse response = new PrescriptionResponse(1L, 1L, 2L, "Amoxicillin", "500mg", "Twice a day", 7, LocalDate.now(), "Take with food");
+        PrescriptionResponse response = new PrescriptionResponse(1L, 1L, 2L, 4L, List.of(), "Take with food");
         Mockito.when(prescriptionService.create(Mockito.any(PrescriptionRequest.class))).thenReturn(response);
 
-        String json = "{\"patientId\":1,\"doctorId\":2,\"medicineName\":\"Amoxicillin\",\"dosage\":\"500mg\",\"frequency\":\"Twice a day\",\"durationDays\":7,\"prescribedDate\":\"" + LocalDate.now() + "\",\"notes\":\"Take with food\"}";
+        String json = "{\"patientId\":1,\"doctorId\":2,\"medicalRecordId\":4,\"items\":[],\"notes\":\"Take with food\"}";
 
         mockMvc.perform(post("/api/prescriptions")
                         .contentType(MediaType.APPLICATION_JSON)

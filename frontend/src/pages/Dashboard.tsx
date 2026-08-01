@@ -1,90 +1,14 @@
-import { Grid } from "@mui/material";
-
-import DashboardHeader from "../components/dashboard/DashboardHeader";
-import StatCard from "../components/dashboard/StatCard";
-import PatientChart from "../components/dashboard/PatientChart";
-import RevenueChart from "../components/dashboard/RevenueChart";
-import RecentPatients from "../components/dashboard/RecentPatients";
-import AppointmentTable from "../components/dashboard/AppointmentTable";
-import NotificationPanel from "../components/dashboard/NotificationPanel";
-
-import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
+import { useEffect, useState } from "react";
+import { Alert, Box, CircularProgress, Grid, Paper, Typography } from "@mui/material";
+import { getDashboardSummary } from "../services/dashboardService";
+import type { DashboardSummary } from "../services/dashboardService";
 
 export default function Dashboard() {
-  return (
-    <>
-      <DashboardHeader />
-
-      {/* KPI Cards */}
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard
-            title="Total Patients"
-            value="3,248"
-            icon={<PeopleAltIcon />}
-            color="#1976D2"
-          />
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard
-            title="Doctors"
-            value="125"
-            icon={<LocalHospitalIcon />}
-            color="#2E7D32"
-          />
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard
-            title="Appointments"
-            value="287"
-            icon={<EventAvailableIcon />}
-            color="#F57C00"
-          />
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard
-            title="Revenue"
-            value="₹12.4 L"
-            icon={<CurrencyRupeeIcon />}
-            color="#8E24AA"
-          />
-        </Grid>
-      </Grid>
-
-      {/* Charts */}
-      <Grid container spacing={3} sx={{ mt: 3 }}>
-        <Grid size={{ xs: 12, lg: 7 }}>
-          <PatientChart />
-        </Grid>
-
-        <Grid size={{ xs: 12, lg: 5 }}>
-          <RevenueChart />
-        </Grid>
-      </Grid>
-
-      {/* Recent Patients & Today's Appointments */}
-      <Grid container spacing={3} sx={{ mt: 3 }}>
-        <Grid size={{ xs: 12, lg: 6 }}>
-          <RecentPatients />
-        </Grid>
-
-        <Grid size={{ xs: 12, lg: 6 }}>
-          <AppointmentTable />
-        </Grid>
-      </Grid>
-
-      {/* Notifications */}
-      <Grid container spacing={3} sx={{ mt: 3, mb: 3 }}>
-        <Grid size={{ xs: 12 }}>
-          <NotificationPanel />
-        </Grid>
-      </Grid>
-    </>
-  );
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => { getDashboardSummary().then(setSummary).catch(() => setError("Unable to load dashboard data.")); }, []);
+  if (error) return <Box sx={{ p: 3 }}><Alert severity="error">{error}</Alert></Box>;
+  if (!summary) return <Box sx={{ display: "flex", justifyContent: "center", p: 8 }}><CircularProgress /></Box>;
+  const metrics = [["Patients", summary.patientCount], ["Doctors", summary.doctorCount], ["Appointments", summary.appointmentCount], ["Revenue", summary.revenue]];
+  return <Box sx={{ p: 3 }}><Typography variant="h4" sx={{ fontWeight: "bold", mb: 3 }}>Dashboard</Typography><Grid container spacing={3}>{metrics.map(([label, value]) => <Grid key={String(label)} size={{ xs: 12, sm: 6, lg: 3 }}><Paper sx={{ p: 3 }}><Typography color="text.secondary">{label}</Typography><Typography variant="h4">{label === "Revenue" ? Number(value).toFixed(2) : value}</Typography></Paper></Grid>)}<Grid size={{ xs: 12 }}><Paper sx={{ p: 3 }}><Typography variant="h6" sx={{ mb: 2 }}>Appointments by status</Typography>{Object.entries(summary.appointmentsByStatus).map(([status, count]) => <Box key={status} sx={{ display: "flex", justifyContent: "space-between", py: 1 }}><Typography>{status}</Typography><Typography>{count}</Typography></Box>)}</Paper></Grid></Grid></Box>;
 }
