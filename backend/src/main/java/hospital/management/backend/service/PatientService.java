@@ -27,6 +27,28 @@ public class PatientService {
 
     public PatientResponse create(Patient patient) {
         Patient saved = patientRepository.save(patient);
+        return toResponse(saved);
+    }
+
+    public PatientResponse update(Long id, Patient patient) {
+        Patient existing = patientRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
+        existing.setFirstName(patient.getFirstName());
+        existing.setLastName(patient.getLastName());
+        existing.setEmail(patient.getEmail());
+        existing.setPhone(patient.getPhone());
+        existing.setDiagnosis(patient.getDiagnosis());
+        return toResponse(patientRepository.save(existing));
+    }
+
+    public void delete(Long id) {
+        if (!patientRepository.existsById(id)) {
+            throw new IllegalArgumentException("Patient not found");
+        }
+        patientRepository.deleteById(id);
+    }
+
+    private PatientResponse toResponse(Patient saved) {
         return new PatientResponse(
                 saved.getId(),
                 saved.getFirstName(),

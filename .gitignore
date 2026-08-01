@@ -1,1 +1,16 @@
 .vscode/settings.json
+# Gradle
+.gradle/
+.gradle-user-home/
+build/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log

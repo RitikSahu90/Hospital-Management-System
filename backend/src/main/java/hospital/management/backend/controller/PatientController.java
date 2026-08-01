@@ -24,4 +24,15 @@ public class PatientController {
     public ResponseEntity<?> createPatient(@RequestBody Patient patient) {
         return ResponseEntity.status(HttpStatus.CREATED).body(patientService.create(patient));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updatePatient(@PathVariable Long id, @RequestBody Patient patient) {
+        return ResponseEntity.ok(patientService.update(id, patient));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
+        patientService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

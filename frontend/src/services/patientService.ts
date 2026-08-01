@@ -34,3 +34,12 @@ export const createPatient = async (
   const response = await patientApi.post<Patient>("/api/patients", patient);
   return response.data;
 };
+
+export const updatePatient = async (id: number, patient: PatientCreateRequest): Promise<Patient> => {
+  const response = await patientApi.put<Patient>(`/api/patients/${id}`, patient);
+  return response.data;
+};
+
+export const deletePatient = async (id: number): Promise<void> => {
+  await patientApi.delete(`/api/patients/${id}`);
+};

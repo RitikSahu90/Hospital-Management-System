@@ -1,4 +1,4 @@
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Button, Chip, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import type { GridColDef } from "@mui/x-data-grid";
 
@@ -6,9 +6,11 @@ import type { Patient } from "../../types/patient";
 
 interface Props {
   patients: Patient[];
+  onEdit: (patient: Patient) => void;
+  onDelete: (patient: Patient) => void;
 }
 
-export default function PatientTable({ patients }: Props) {
+export default function PatientTable({ patients, onEdit, onDelete }: Props) {
   const columns: GridColDef[] = [
     {
       field: "id",
@@ -47,6 +49,13 @@ export default function PatientTable({ patients }: Props) {
           />
         );
       },
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 180,
+      sortable: false,
+      renderCell: (params) => <Box sx={{ display: "flex", gap: 1, pt: 0.8 }}><Button size="small" onClick={() => onEdit(params.row as Patient)}>Edit</Button><Button size="small" color="error" onClick={() => onDelete(params.row as Patient)}>Delete</Button></Box>,
     },
   ];
 

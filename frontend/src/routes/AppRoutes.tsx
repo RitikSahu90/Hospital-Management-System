@@ -7,6 +7,7 @@ import Doctors from "../pages/Doctors";
 import Appointments from "../pages/Appointments";
 import Billing from "../pages/Billing";
 import Pharmacy from "../pages/Pharmacy";
+import Prescriptions from "../pages/Prescriptions";
 import Laboratory from "../pages/Laboratory";
 import Settings from "../pages/Settings";
 
@@ -27,6 +28,7 @@ export default function AppRoutes() {
             <Route path="/appointments" element={<Appointments />} />
             <Route path="/billing" element={<Billing />} />
             <Route path="/pharmacy" element={<Pharmacy />} />
+            <Route path="/prescriptions" element={<Prescriptions />} />
             <Route path="/laboratory" element={<Laboratory />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
