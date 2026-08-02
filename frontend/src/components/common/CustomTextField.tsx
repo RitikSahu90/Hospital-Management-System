@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 
@@ -6,7 +6,7 @@ interface CustomTextFieldProps {
   label: string;
   type?: string;
   value?: string;
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   startIcon?: ReactNode;
   endIcon?: ReactNode;
 }
@@ -28,18 +28,20 @@ export default function CustomTextField({
       type={type}
       value={value}
       onChange={onChange}
-      InputProps={{
-        startAdornment: startIcon ? (
-          <InputAdornment position="start">
-            {startIcon}
-          </InputAdornment>
-        ) : undefined,
+      slotProps={{
+        input: {
+          startAdornment: startIcon ? (
+            <InputAdornment position="start">
+              {startIcon}
+            </InputAdornment>
+          ) : undefined,
 
-        endAdornment: endIcon ? (
-          <InputAdornment position="end">
-            {endIcon}
-          </InputAdornment>
-        ) : undefined,
+          endAdornment: endIcon ? (
+            <InputAdornment position="end">
+              {endIcon}
+            </InputAdornment>
+          ) : undefined,
+        },
       }}
       sx={{
         "& .MuiOutlinedInput-root": {

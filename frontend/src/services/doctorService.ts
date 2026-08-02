@@ -1,0 +1,10 @@
+import apiClient from "./apiClient";
+import type { Availability, AvailabilityRequest, Doctor, DoctorRequest } from "../types/clinical";
+export const getDoctors = () => apiClient.get<Doctor[]>("/api/doctors").then((r) => r.data);
+export const createDoctor = (body: DoctorRequest) => apiClient.post<Doctor>("/api/doctors", body).then((r) => r.data);
+export const updateDoctor = (id: number, body: DoctorRequest) => apiClient.put<Doctor>(`/api/doctors/${id}`, body).then((r) => r.data);
+export const deleteDoctor = (id: number) => apiClient.delete(`/api/doctors/${id}`);
+export const getAvailability = (doctorId: number) => apiClient.get<Availability[]>(`/api/doctors/${doctorId}/availability`).then((r) => r.data);
+export const addAvailability = (doctorId: number, body: AvailabilityRequest) => apiClient.post<Availability>(`/api/doctors/${doctorId}/availability`, body).then((r) => r.data);
+export const updateAvailability = (doctorId: number, availabilityId: number, body: AvailabilityRequest) => apiClient.put<Availability>(`/api/doctors/${doctorId}/availability/${availabilityId}`, body).then((r) => r.data);
+export const deleteAvailability = (doctorId: number, availabilityId: number) => apiClient.delete(`/api/doctors/${doctorId}/availability/${availabilityId}`);

@@ -9,6 +9,11 @@ import hospital.management.backend.entity.DoctorAvailability;
 import hospital.management.backend.mapper.DoctorMapper;
 import hospital.management.backend.repository.DoctorAvailabilityRepository;
 import hospital.management.backend.repository.DoctorRepository;
+import hospital.management.backend.repository.DepartmentRepository;
+import hospital.management.backend.repository.UserRepository;
+import hospital.management.backend.entity.Department;
+import hospital.management.backend.entity.User;
+import hospital.management.backend.enums.AvailabilityDay;
 import hospital.management.backend.service.impl.DoctorServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +43,8 @@ class DoctorServiceTest {
 
     @Mock
     private DoctorMapper doctorMapper;
+    @Mock private DepartmentRepository departmentRepository;
+    @Mock private UserRepository userRepository;
 
     @InjectMocks
     private DoctorServiceImpl doctorService;
@@ -54,6 +61,8 @@ class DoctorServiceTest {
         DoctorResponse response = new DoctorResponse(3L, "Neha", "Kumar", "LIC-1", "Neurology", null, null);
 
         when(doctorMapper.toEntity(request)).thenReturn(entity);
+        when(departmentRepository.findById(any())).thenReturn(Optional.of(new Department()));
+        when(userRepository.findById(any())).thenReturn(Optional.of(new User()));
         when(doctorRepository.save(entity)).thenReturn(entity);
         when(doctorMapper.toResponse(entity)).thenReturn(response);
 
@@ -78,6 +87,8 @@ class DoctorServiceTest {
         DoctorResponse response = new DoctorResponse(3L, "Neha", "Kumar", "LIC-1", "Neurology", "9876543210", 500.0);
 
         when(doctorRepository.findById(3L)).thenReturn(Optional.of(existing));
+        when(departmentRepository.findById(any())).thenReturn(Optional.of(new Department()));
+        when(userRepository.findById(any())).thenReturn(Optional.of(new User()));
         when(doctorRepository.save(existing)).thenReturn(existing);
         when(doctorMapper.toResponse(existing)).thenReturn(response);
 
@@ -183,7 +194,7 @@ class DoctorServiceTest {
         List<AvailabilityResponse> list = doctorService.getAvailability(5L);
 
         assertThat(created.getDoctorId()).isEqualTo(5L);
-        assertThat(created.getDayOfWeek()).isEqualTo(DayOfWeek.MONDAY);
+        assertThat(created.getDayOfWeek()).isEqualTo(AvailabilityDay.MON);
         assertThat(list).hasSize(1);
         verify(availabilityRepository).save(any(DoctorAvailability.class));
     }

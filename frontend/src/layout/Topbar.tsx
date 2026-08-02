@@ -17,12 +17,12 @@ export default function Topbar() {
           justifyContent: "space-between",
         }}
       >
-        <Typography variant="h5" fontWeight={700}>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
           Dashboard
         </Typography>
 
-        <Box display="flex" alignItems="center" gap={2}>
-          <Typography fontWeight={500}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Typography sx={{ fontWeight: 500 }}>
             Admin
           </Typography>
 

@@ -2,7 +2,11 @@ package hospital.management.backend.controller;
 
 import hospital.management.backend.dto.response.MedicineResponse;
 import hospital.management.backend.entity.Medicine;
+import hospital.management.backend.entity.Inventory;
+import hospital.management.backend.entity.Supplier;
+import hospital.management.backend.repository.InventoryRepository;
 import hospital.management.backend.repository.MedicineRepository;
+import hospital.management.backend.repository.SupplierRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -12,7 +16,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,11 +32,14 @@ class MedicineControllerIntegrationTest {
 
     @Autowired
     private MedicineRepository medicineRepository;
+    @Autowired private SupplierRepository supplierRepository;
+    @Autowired private InventoryRepository inventoryRepository;
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void shouldCreateAndRetrieveMedicine() throws Exception {
-        String json = "{\"name\":\"Paracetamol\",\"manufacturer\":\"PharmaCo\",\"unitPrice\":15.5,\"stockQuantity\":50,\"expiryDate\":\"" + LocalDate.now().plusMonths(6) + "\"}";
+        Supplier supplier = new Supplier(); supplier.setName("PharmaCo Supplier"); supplier.setPhone("9999999999"); supplier = supplierRepository.save(supplier);
+        String json = "{\"supplierId\":" + supplier.getId() + ",\"name\":\"Paracetamol\",\"manufacturer\":\"PharmaCo\",\"unitPrice\":15.5,\"stockQuantity\":50,\"reorderLevel\":5,\"expiryDate\":\"2030-01-01\"}";
 
         mockMvc.perform(post("/api/medicines")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -43,6 +49,7 @@ class MedicineControllerIntegrationTest {
 
         Medicine saved = medicineRepository.findByName("Paracetamol").orElseThrow();
         assertThat(saved.getManufacturer()).isEqualTo("PharmaCo");
-        assertThat(saved.getStockQuantity()).isEqualTo(50);
+        Inventory inventory = inventoryRepository.findByMedicine(saved).orElseThrow();
+        assertThat(inventory.getStockQuantity()).isEqualTo(50);
     }
 }

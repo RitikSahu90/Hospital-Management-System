@@ -1,15 +1,26 @@
 export interface Patient {
   id: number;
-  patientId: string;
+  patientNumber: string;
   firstName: string;
   lastName: string;
-  age: number;
-  gender: "Male" | "Female" | "Other";
-  bloodGroup: string;
-  phone: string;
   email: string;
-  address: string;
-  doctor: string;
-  disease: string;
-  status: "Admitted" | "Discharged" | "Under Treatment";
+  phone: string;
+  dateOfBirth: string;
+  gender: "MALE" | "FEMALE" | "OTHER";
+  address?: string;
+  bloodGroup?: string;
+  diagnosis?: string;
+}
+
+export interface PatientCreateRequest {
+  patientNumber: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: "MALE" | "FEMALE" | "OTHER";
+  address?: string;
+  bloodGroup?: string;
+  diagnosis?: string;
 }

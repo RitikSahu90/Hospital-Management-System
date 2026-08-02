@@ -2,6 +2,8 @@ package hospital.management.backend.enums;
 
 public enum AppointmentStatus {
     SCHEDULED,
+    CONFIRMED,
     CANCELLED,
-    COMPLETED
+    COMPLETED,
+    NO_SHOW
 }

@@ -44,7 +44,7 @@ class MedicineControllerTest {
 
         Mockito.when(medicineService.create(Mockito.any())).thenReturn(response);
 
-        String json = "{\"name\":\"Paracetamol\",\"manufacturer\":\"PharmaCo\",\"unitPrice\":12.5,\"stockQuantity\":100,\"expiryDate\":\"" + response.getExpiryDate() + "\"}";
+        String json = "{\"supplierId\":1,\"name\":\"Paracetamol\",\"manufacturer\":\"PharmaCo\",\"unitPrice\":12.5,\"stockQuantity\":100,\"reorderLevel\":10,\"expiryDate\":\"2030-01-01\"}";
 
         mockMvc.perform(post("/api/medicines")
                         .contentType(MediaType.APPLICATION_JSON)

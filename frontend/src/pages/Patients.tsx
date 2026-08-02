@@ -1,88 +1,104 @@
-import { useMemo, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 
 import PatientToolbar from "../components/patients/PatientToolbar";
 import PatientTable from "../components/patients/PatientTable";
 import AddPatientDialog from "../components/patients/AddPatientDialog";
+import EditPatientDialog from "../components/patients/EditPatientDialog";
+import DeletePatientDialog from "../components/patients/DeletePatientDialog";
 
-import { patients as initialPatients } from "../data/patients";
-import type { Patient } from "../types/patient";
+import { createPatient, deletePatient, getPatients, updatePatient } from "../services/patientService";
+import type { Patient, PatientCreateRequest } from "../types/patient";
 
 export default function Patients() {
-  const [patients, setPatients] = useState<Patient[]>(initialPatients);
-
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [search, setSearch] = useState("");
-
   const [openAdd, setOpenAdd] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
+  const [deletingPatient, setDeletingPatient] = useState<Patient | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const loadPatients = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getPatients();
+        setPatients(data);
+      } catch (err) {
+        console.error(err);
+        setError("Unable to load patients from the backend.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPatients();
+  }, []);
 
   const filteredPatients = useMemo(() => {
     const keyword = search.toLowerCase();
 
     return patients.filter((patient) =>
-      [
-        patient.patientId,
-        patient.firstName,
-        patient.lastName,
-        patient.phone,
-        patient.doctor,
-        patient.disease,
-        patient.status,
-      ]
+      [patient.firstName, patient.lastName, patient.phone, patient.email, patient.diagnosis]
         .join(" ")
         .toLowerCase()
         .includes(keyword)
     );
   }, [patients, search]);
 
-  const handleAddPatient = (patient: Patient) => {
-    setPatients((prev) => [...prev, patient]);
-  };
-
-  const handleDeletePatient = (patient: Patient) => {
-    if (
-      window.confirm(
-        `Delete ${patient.firstName} ${patient.lastName}?`
-      )
-    ) {
-      setPatients((prev) =>
-        prev.filter((p) => p.id !== patient.id)
-      );
+  const handleAddPatient = async (patient: PatientCreateRequest) => {
+    try {
+      const created = await createPatient(patient);
+      setPatients((prev) => [created, ...prev]);
+      setOpenAdd(false);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to create patient. Please check the form values.");
     }
   };
 
-  const handleEditPatient = (patient: Patient) => {
-    alert(
-      `Edit feature coming next.\n\nSelected Patient:\n${patient.firstName} ${patient.lastName}`
-    );
+  const handleEditPatient = async (patient: PatientCreateRequest) => {
+    if (!editingPatient) return;
+    try { setSaving(true); setError(null); const updated = await updatePatient(editingPatient.id, patient); setPatients((current) => current.map((item) => item.id === updated.id ? updated : item)); setEditingPatient(null); }
+    catch (err) { console.error(err); setError("Unable to update patient. Please check the form values."); }
+    finally { setSaving(false); }
+  };
+
+  const handleDeletePatient = async () => {
+    if (!deletingPatient) return;
+    try { setSaving(true); setError(null); await deletePatient(deletingPatient.id); setPatients((current) => current.filter((item) => item.id !== deletingPatient.id)); setDeletingPatient(null); }
+    catch (err) { console.error(err); setError("Unable to delete patient."); }
+    finally { setSaving(false); }
   };
 
   return (
-    <Box p={3}>
-      <Typography
-        variant="h4"
-        fontWeight="bold"
-        mb={3}
-      >
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3 }}>
         Patients
       </Typography>
 
-      <PatientToolbar
-        search={search}
-        setSearch={setSearch}
-        onAdd={() => setOpenAdd(true)}
-      />
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-      <PatientTable
-        patients={filteredPatients}
-        onEdit={handleEditPatient}
-        onDelete={handleDeletePatient}
-      />
+      <PatientToolbar search={search} setSearch={setSearch} onAdd={() => setOpenAdd(true)} />
 
-      <AddPatientDialog
-        open={openAdd}
-        onClose={() => setOpenAdd(false)}
-        onSave={handleAddPatient}
-      />
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <PatientTable patients={filteredPatients} onEdit={setEditingPatient} onDelete={setDeletingPatient} />
+      )}
+
+      <AddPatientDialog open={openAdd} onClose={() => setOpenAdd(false)} onSave={handleAddPatient} />
+      <EditPatientDialog open={Boolean(editingPatient)} patient={editingPatient} saving={saving} onClose={() => setEditingPatient(null)} onSave={handleEditPatient} />
+      <DeletePatientDialog open={Boolean(deletingPatient)} patient={deletingPatient} deleting={saving} onClose={() => setDeletingPatient(null)} onConfirm={() => void handleDeletePatient()} />
     </Box>
   );
 }

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Instant;
 
 @Entity
 @Table(name = "medicines")
@@ -20,18 +21,26 @@ public class Medicine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "supplier_id", nullable = false)
+    private Supplier supplier;
+
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String manufacturer;
 
-    @Column(nullable = false)
+    @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(nullable = false)
-    private Integer stockQuantity;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
-    @Column(nullable = false)
-    private LocalDate expiryDate;
+    @PrePersist
+    void onCreate() { Instant now = Instant.now(); createdAt = now; updatedAt = now; }
+    @PreUpdate
+    void onUpdate() { updatedAt = Instant.now(); }
 }

@@ -92,10 +92,10 @@ class AuthServiceTest {
 
     @Test
     void shouldRegisterNewUserWhenRoleExists() {
-        Role role = Role.builder().id(1L).name("ADMIN").build();
+        Role role = Role.builder().id(1L).name("PATIENT").build();
 
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
-        when(roleRepository.findByName("ADMIN")).thenReturn(Optional.of(role));
+        when(roleRepository.findByName("PATIENT")).thenReturn(Optional.of(role));
         when(passwordEncoder.encode("pass123")).thenReturn("encoded-pass");
         when(jwtUtil.generateToken("newuser")).thenReturn("token-456");
 
@@ -109,10 +109,10 @@ class AuthServiceTest {
 
     @Test
     void shouldRegisterNewUserAndCreateRoleWhenRoleMissing() {
-        Role savedRole = Role.builder().id(1L).name("ADMIN").build();
+        Role savedRole = Role.builder().id(1L).name("PATIENT").build();
 
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
-        when(roleRepository.findByName("ADMIN")).thenReturn(Optional.empty());
+        when(roleRepository.findByName("PATIENT")).thenReturn(Optional.empty());
         when(roleRepository.save(any(Role.class))).thenReturn(savedRole);
         when(passwordEncoder.encode("pass123")).thenReturn("encoded-pass");
         when(jwtUtil.generateToken("newuser")).thenReturn("token-789");

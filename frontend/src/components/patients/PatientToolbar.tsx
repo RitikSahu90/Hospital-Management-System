@@ -18,10 +18,7 @@ export default function PatientToolbar({
 }: Props) {
   return (
     <Box
-      display="flex"
-      justifyContent="space-between"
-      alignItems="center"
-      mb={2}
+      sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}
     >
       <TextField
         label="Search Patient"

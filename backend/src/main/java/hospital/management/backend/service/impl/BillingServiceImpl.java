@@ -3,20 +3,20 @@ package hospital.management.backend.service.impl;
 import hospital.management.backend.dto.request.BillingRequest;
 import hospital.management.backend.dto.response.BillingResponse;
 import hospital.management.backend.entity.Billing;
-import hospital.management.backend.entity.Doctor;
+import hospital.management.backend.entity.Appointment;
 import hospital.management.backend.entity.Patient;
-import hospital.management.backend.entity.Prescription;
 import hospital.management.backend.mapper.BillingMapper;
 import hospital.management.backend.repository.BillingRepository;
 import hospital.management.backend.repository.PatientRepository;
-import hospital.management.backend.repository.PrescriptionRepository;
+import hospital.management.backend.repository.AppointmentRepository;
+import hospital.management.backend.repository.PaymentRepository;
 import hospital.management.backend.service.BillingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -24,22 +24,21 @@ import java.util.stream.Collectors;
 public class BillingServiceImpl implements BillingService {
     private final BillingRepository billingRepository;
     private final PatientRepository patientRepository;
-    private final PrescriptionRepository prescriptionRepository;
+        private final AppointmentRepository appointmentRepository;
+        private final PaymentRepository paymentRepository;
     private final BillingMapper billingMapper;
 
     @Override
     public BillingResponse create(BillingRequest request) {
         Patient patient = patientRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
-        Prescription prescription = prescriptionRepository.findById(request.getPrescriptionId())
-                .orElseThrow(() -> new IllegalArgumentException("Prescription not found"));
 
         Billing billing = billingMapper.toEntity(request);
         billing.setPatient(patient);
-        billing.setPrescription(prescription);
+        billing.setAppointment(findAppointment(request.getAppointmentId()));
 
         Billing saved = billingRepository.save(billing);
-        return billingMapper.toResponse(saved);
+        return toResponse(saved);
     }
 
     @Override
@@ -49,23 +48,19 @@ public class BillingServiceImpl implements BillingService {
 
         Patient patient = patientRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
-        Prescription prescription = prescriptionRepository.findById(request.getPrescriptionId())
-                .orElseThrow(() -> new IllegalArgumentException("Prescription not found"));
-
         billing.setPatient(patient);
-        billing.setPrescription(prescription);
-        billing.setTotalAmount(request.getTotalAmount());
-        billing.setPaidAmount(request.getPaidAmount());
-        billing.setDueAmount(request.getTotalAmount().subtract(request.getPaidAmount()));
-        billing.setBillingDate(request.getBillingDate());
-        billing.setPaid(request.getPaidAmount().compareTo(request.getTotalAmount()) >= 0);
+        billing.setAppointment(findAppointment(request.getAppointmentId()));
+        billing.setConsultationFee(request.getConsultationFee());
+        billing.setMedicineCharges(request.getMedicineCharges());
+        billing.setOtherCharges(request.getOtherCharges());
 
         Billing saved = billingRepository.save(billing);
-        return billingMapper.toResponse(saved);
+        return toResponse(saved);
     }
 
     @Override
     public void delete(Long id) {
+        if (!billingRepository.existsById(id)) throw new IllegalArgumentException("Billing not found");
         billingRepository.deleteById(id);
     }
 
@@ -73,13 +68,20 @@ public class BillingServiceImpl implements BillingService {
     public BillingResponse findById(Long id) {
         Billing billing = billingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Billing not found"));
-        return billingMapper.toResponse(billing);
+        return toResponse(billing);
     }
 
     @Override
     public List<BillingResponse> findAll() {
-        return billingRepository.findAll().stream()
-                .map(billingMapper::toResponse)
-                .collect(Collectors.toList());
+                return billingRepository.findAll().stream().map(this::toResponse).toList();
     }
+
+        private Appointment findAppointment(Long id) {
+                return id == null ? null : appointmentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+        }
+
+        private BillingResponse toResponse(Billing billing) {
+                BigDecimal paid = paymentRepository.findByBillId(billing.getId()).stream().map(payment -> payment.getAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                return billingMapper.toResponse(billing, paid);
+        }
 }

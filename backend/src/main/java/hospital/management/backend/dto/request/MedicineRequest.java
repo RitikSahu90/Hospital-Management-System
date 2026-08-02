@@ -11,6 +11,9 @@ import java.time.LocalDate;
 
 @Data
 public class MedicineRequest {
+    @NotNull
+    private Long supplierId;
+
     @NotBlank
     private String name;
 
@@ -24,6 +27,10 @@ public class MedicineRequest {
     @NotNull
     @Min(0)
     private Integer stockQuantity;
+
+    @NotNull
+    @Min(0)
+    private Integer reorderLevel = 10;
 
     @NotNull
     @Future

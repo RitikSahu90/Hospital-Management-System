@@ -7,31 +7,27 @@ import {
   Button,
   Grid,
   TextField,
-  MenuItem,
 } from "@mui/material";
 
-import type { Patient } from "../../types/patient";
+import type { PatientCreateRequest } from "../../types/patient";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  onSave: (patient: Patient) => void;
+  onSave: (patient: PatientCreateRequest) => void;
 }
 
-const emptyPatient: Patient = {
-  id: 0,
-  patientId: "",
+const emptyPatient: PatientCreateRequest = {
+  patientNumber: "",
   firstName: "",
   lastName: "",
-  age: 0,
-  gender: "Male",
-  bloodGroup: "O+",
-  phone: "",
   email: "",
+  phone: "",
+  dateOfBirth: "",
+  gender: "OTHER",
   address: "",
-  doctor: "",
-  disease: "",
-  status: "Admitted",
+  bloodGroup: "",
+  diagnosis: "",
 };
 
 export default function AddPatientDialog({
@@ -39,188 +35,58 @@ export default function AddPatientDialog({
   onClose,
   onSave,
 }: Props) {
-  const [patient, setPatient] = useState<Patient>(emptyPatient);
+  const [patient, setPatient] = useState<PatientCreateRequest>(emptyPatient);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPatient({
       ...patient,
-      [e.target.name]:
-        e.target.name === "age"
-          ? Number(e.target.value)
-          : e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSave = () => {
-    onSave({
-      ...patient,
-      id: Date.now(),
-      patientId: `PAT-${Math.floor(
-        1000 + Math.random() * 9000
-      )}`,
-    });
-
+    onSave(patient);
     setPatient(emptyPatient);
     onClose();
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-    >
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Add Patient</DialogTitle>
 
       <DialogContent>
-        <Grid container spacing={2} mt={1}>
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth label="Patient Number" name="patientNumber" value={patient.patientNumber} onChange={handleChange} required /></Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField
-              fullWidth
-              label="First Name"
-              name="firstName"
-              value={patient.firstName}
-              onChange={handleChange}
-            />
+            <TextField fullWidth label="First Name" name="firstName" value={patient.firstName} onChange={handleChange} />
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField
-              fullWidth
-              label="Last Name"
-              name="lastName"
-              value={patient.lastName}
-              onChange={handleChange}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 4 }}>
-            <TextField
-              fullWidth
-              label="Age"
-              type="number"
-              name="age"
-              value={patient.age}
-              onChange={handleChange}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 4 }}>
-            <TextField
-              select
-              fullWidth
-              label="Gender"
-              name="gender"
-              value={patient.gender}
-              onChange={handleChange}
-            >
-              <MenuItem value="Male">Male</MenuItem>
-              <MenuItem value="Female">Female</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
-            </TextField>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 4 }}>
-            <TextField
-              select
-              fullWidth
-              label="Blood Group"
-              name="bloodGroup"
-              value={patient.bloodGroup}
-              onChange={handleChange}
-            >
-              <MenuItem value="A+">A+</MenuItem>
-              <MenuItem value="A-">A-</MenuItem>
-              <MenuItem value="B+">B+</MenuItem>
-              <MenuItem value="B-">B-</MenuItem>
-              <MenuItem value="AB+">AB+</MenuItem>
-              <MenuItem value="AB-">AB-</MenuItem>
-              <MenuItem value="O+">O+</MenuItem>
-              <MenuItem value="O-">O-</MenuItem>
-            </TextField>
+            <TextField fullWidth label="Last Name" name="lastName" value={patient.lastName} onChange={handleChange} />
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField
-              fullWidth
-              label="Phone"
-              name="phone"
-              value={patient.phone}
-              onChange={handleChange}
-            />
+            <TextField fullWidth label="Phone" name="phone" value={patient.phone} onChange={handleChange} />
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField
-              fullWidth
-              label="Email"
-              name="email"
-              value={patient.email}
-              onChange={handleChange}
-            />
+            <TextField fullWidth label="Email" name="email" value={patient.email} onChange={handleChange} />
           </Grid>
+
+          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth label="Date of Birth" name="dateOfBirth" type="date" value={patient.dateOfBirth} onChange={handleChange} slotProps={{ inputLabel: { shrink: true } }} required /></Grid>
+          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth select label="Gender" name="gender" value={patient.gender} onChange={handleChange} slotProps={{ select: { native: true } }}><option value="MALE">Male</option><option value="FEMALE">Female</option><option value="OTHER">Other</option></TextField></Grid>
+          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth label="Blood Group" name="bloodGroup" value={patient.bloodGroup} onChange={handleChange} /></Grid>
+          <Grid size={{ xs: 12 }}><TextField fullWidth label="Address" name="address" value={patient.address} onChange={handleChange} /></Grid>
 
           <Grid size={{ xs: 12 }}>
-            <TextField
-              fullWidth
-              label="Address"
-              name="address"
-              value={patient.address}
-              onChange={handleChange}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TextField
-              fullWidth
-              label="Doctor"
-              name="doctor"
-              value={patient.doctor}
-              onChange={handleChange}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TextField
-              fullWidth
-              label="Disease"
-              name="disease"
-              value={patient.disease}
-              onChange={handleChange}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12 }}>
-            <TextField
-              select
-              fullWidth
-              label="Status"
-              name="status"
-              value={patient.status}
-              onChange={handleChange}
-            >
-              <MenuItem value="Admitted">Admitted</MenuItem>
-              <MenuItem value="Under Treatment">
-                Under Treatment
-              </MenuItem>
-              <MenuItem value="Discharged">
-                Discharged
-              </MenuItem>
-            </TextField>
+            <TextField fullWidth label="Diagnosis" name="diagnosis" value={patient.diagnosis} onChange={handleChange} />
           </Grid>
         </Grid>
       </DialogContent>
 
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-
-        <Button
-          variant="contained"
-          onClick={handleSave}
-        >
+        <Button variant="contained" onClick={handleSave}>
           Save
         </Button>
       </DialogActions>

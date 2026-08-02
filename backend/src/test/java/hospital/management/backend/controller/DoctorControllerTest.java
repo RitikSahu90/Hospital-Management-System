@@ -54,7 +54,7 @@ class DoctorControllerTest {
 
         mockMvc.perform(post("/api/doctors")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"firstName\":\"Ravi\",\"lastName\":\"Sharma\",\"licenseNumber\":\"LIC-9\",\"specialization\":\"Cardiology\"}"))
+                        .content("{\"userId\":1,\"departmentId\":2,\"doctorCode\":\"DOC-9\",\"firstName\":\"Ravi\",\"lastName\":\"Sharma\",\"licenseNumber\":\"LIC-9\",\"specialization\":\"Cardiology\",\"phone\":\"9999999999\",\"yearsExperience\":1,\"status\":\"ACTIVE\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1));
     }

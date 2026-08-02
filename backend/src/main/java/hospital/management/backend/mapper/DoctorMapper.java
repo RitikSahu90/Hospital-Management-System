@@ -15,6 +15,9 @@ public class DoctorMapper {
                 .specialization(req.getSpecialization())
                 .phone(req.getPhone())
                 .consultationFee(req.getConsultationFee())
+                .doctorCode(req.getDoctorCode())
+                .yearsExperience(req.getYearsExperience())
+                .status(req.getStatus())
                 .build();
     }
 

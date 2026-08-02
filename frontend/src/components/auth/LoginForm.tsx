@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
+  Alert,
   Box,
   Checkbox,
   FormControlLabel,
@@ -15,23 +17,49 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 import CustomTextField from "../common/CustomTextField";
 import PrimaryButton from "../common/PrimaryButton";
+import { login as loginRequest } from "../../services/authService";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await loginRequest({ username, password });
+      login(response.token, response.username, response.role || "PATIENT");
+      navigate("/dashboard");
+    } catch (err) {
+      setError("Invalid username or password.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <>
-      {/* Email Field */}
+    <form onSubmit={handleSubmit}>
+      {error ? (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      ) : null}
+
       <CustomTextField
-        label="Email Address"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        label="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
         startIcon={<EmailOutlinedIcon color="action" />}
       />
 
-      {/* Password Field */}
       <CustomTextField
         label="Password"
         type={showPassword ? "text" : "password"}
@@ -48,12 +76,13 @@ export default function LoginForm() {
         }
       />
 
-      {/* Remember Me & Forgot Password */}
       <Box
-        mt={2}
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
+        sx={{
+          mt: 2,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
         <FormControlLabel
           control={<Checkbox color="primary" />}
@@ -72,12 +101,11 @@ export default function LoginForm() {
         </Link>
       </Box>
 
-      {/* Sign In Button */}
-      <Box mt={3}>
-        <PrimaryButton type="submit">
-          SIGN IN
+      <Box sx={{ mt: 3 }}>
+        <PrimaryButton type="submit" disabled={loading}>
+          {loading ? "Signing In..." : "SIGN IN"}
         </PrimaryButton>
       </Box>
-    </>
+    </form>
   );
 }

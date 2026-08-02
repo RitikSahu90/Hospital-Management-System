@@ -15,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +31,11 @@ public class AuthService {
         );
 
         String token = jwtUtil.generateToken(authentication.getName());
-        return new AuthResponse(token, authentication.getName());
+        String role = authentication.getAuthorities().stream()
+            .map(authority -> authority.getAuthority().replaceFirst("^ROLE_", ""))
+            .findFirst()
+            .orElse(null);
+        return new AuthResponse(token, authentication.getName(), role);
     }
 
     public AuthResponse register(RegisterRequest request) {
@@ -40,18 +43,18 @@ public class AuthService {
             throw new IllegalArgumentException("Username already exists");
         }
 
-        Role role = roleRepository.findByName("ADMIN")
-                .orElseGet(() -> roleRepository.save(Role.builder().name("ADMIN").build()));
+        Role role = roleRepository.findByName("PATIENT")
+            .orElseGet(() -> roleRepository.save(Role.builder().name("PATIENT").build()));
 
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .roles(Set.of(role))
+                .role(role)
                 .build();
 
         userRepository.save(user);
         String token = jwtUtil.generateToken(user.getUsername());
-        return new AuthResponse(token, user.getUsername());
+        return new AuthResponse(token, user.getUsername(), role.getName());
     }
 }

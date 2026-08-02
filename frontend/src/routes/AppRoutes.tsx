@@ -7,10 +7,16 @@ import Doctors from "../pages/Doctors";
 import Appointments from "../pages/Appointments";
 import Billing from "../pages/Billing";
 import Pharmacy from "../pages/Pharmacy";
+import Prescriptions from "../pages/Prescriptions";
 import Laboratory from "../pages/Laboratory";
-import Settings from "../pages/Settings";
+import Departments from "../pages/Departments";
+import MedicalRecords from "../pages/MedicalRecords";
+import Suppliers from "../pages/Suppliers";
+import Availability from "../pages/Availability";
+import Payments from "../pages/Payments";
 
 import MainLayout from "../layout/MainLayout";
+import ProtectedRoute from "../components/common/ProtectedRoute";
 
 export default function AppRoutes() {
   return (
@@ -18,15 +24,22 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<Login />} />
 
-        <Route element={<MainLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/patients" element={<Patients />} />
-          <Route path="/doctors" element={<Doctors />} />
-          <Route path="/appointments" element={<Appointments />} />
-          <Route path="/billing" element={<Billing />} />
-          <Route path="/pharmacy" element={<Pharmacy />} />
-          <Route path="/laboratory" element={<Laboratory />} />
-          <Route path="/settings" element={<Settings />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<MainLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/patients" element={<Patients />} />
+            <Route path="/doctors" element={<Doctors />} />
+            <Route path="/departments" element={<Departments />} />
+            <Route path="/medical-records" element={<MedicalRecords />} />
+            <Route path="/suppliers" element={<Suppliers />} />
+            <Route path="/availability" element={<Availability />} />
+            <Route path="/payments" element={<Payments />} />
+            <Route path="/appointments" element={<Appointments />} />
+            <Route path="/billing" element={<Billing />} />
+            <Route path="/pharmacy" element={<Pharmacy />} />
+            <Route path="/prescriptions" element={<Prescriptions />} />
+            <Route path="/laboratory" element={<Laboratory />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

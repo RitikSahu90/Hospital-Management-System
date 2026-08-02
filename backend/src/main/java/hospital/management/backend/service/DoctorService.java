@@ -16,4 +16,6 @@ public interface DoctorService {
 
     AvailabilityResponse addAvailability(Long doctorId, AvailabilityRequest request);
     List<AvailabilityResponse> getAvailability(Long doctorId);
+    AvailabilityResponse updateAvailability(Long doctorId, Long availabilityId, AvailabilityRequest request);
+    void deleteAvailability(Long doctorId, Long availabilityId);
 }

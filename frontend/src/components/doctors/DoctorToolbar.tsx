@@ -14,9 +14,7 @@ export default function DoctorToolbar({
 }: Props) {
   return (
     <Box
-      display="flex"
-      justifyContent="space-between"
-      mb={2}
+      sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}
     >
       <TextField
         label="Search Doctor"

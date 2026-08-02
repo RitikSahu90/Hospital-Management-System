@@ -64,4 +64,17 @@ public class DoctorController {
     public ResponseEntity<List<AvailabilityResponse>> getAvailability(@PathVariable Long id) {
         return ResponseEntity.ok(doctorService.getAvailability(id));
     }
+
+    @PutMapping("/{id}/availability/{availabilityId}")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST')")
+    public ResponseEntity<AvailabilityResponse> updateAvailability(@PathVariable Long id, @PathVariable Long availabilityId, @Valid @RequestBody AvailabilityRequest request) {
+        return ResponseEntity.ok(doctorService.updateAvailability(id, availabilityId, request));
+    }
+
+    @DeleteMapping("/{id}/availability/{availabilityId}")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
+    public ResponseEntity<Void> deleteAvailability(@PathVariable Long id, @PathVariable Long availabilityId) {
+        doctorService.deleteAvailability(id, availabilityId);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -21,7 +21,6 @@ import EventNoteIcon from "@mui/icons-material/EventNote";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import MedicationIcon from "@mui/icons-material/Medication";
 import ScienceIcon from "@mui/icons-material/Science";
-import SettingsIcon from "@mui/icons-material/Settings";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import MenuIcon from "@mui/icons-material/Menu";
 
@@ -44,6 +43,8 @@ const menuItems = [
     path: "/doctors",
     icon: <LocalHospitalIcon />,
   },
+  { text: "Departments", path: "/departments", icon: <LocalHospitalIcon /> },
+  { text: "Availability", path: "/availability", icon: <EventNoteIcon /> },
   {
     text: "Appointments",
     path: "/appointments",
@@ -64,11 +65,9 @@ const menuItems = [
     path: "/laboratory",
     icon: <ScienceIcon />,
   },
-  {
-    text: "Settings",
-    path: "/settings",
-    icon: <SettingsIcon />,
-  },
+  { text: "Medical Records", path: "/medical-records", icon: <ScienceIcon /> },
+  { text: "Suppliers", path: "/suppliers", icon: <MedicationIcon /> },
+  { text: "Payments", path: "/payments", icon: <ReceiptLongIcon /> },
 ];
 
 export default function Sidebar() {
@@ -101,7 +100,7 @@ export default function Sidebar() {
         }}
       >
         {!collapsed && (
-          <Typography fontWeight={700} fontSize={22}>
+          <Typography sx={{ fontWeight: 700, fontSize: 22 }}>
             Multicare HMS
           </Typography>
         )}
@@ -155,9 +154,11 @@ export default function Sidebar() {
             {!collapsed && (
               <ListItemText
                 primary={item.text}
-                primaryTypographyProps={{
-                  fontSize: 15,
-                  fontWeight: 500,
+                sx={{
+                  "& .MuiListItemText-primary": {
+                    fontSize: 15,
+                    fontWeight: 500,
+                  },
                 }}
               />
             )}
@@ -165,14 +166,11 @@ export default function Sidebar() {
         ))}
       </List>
 
-      <Box flexGrow={1} />
+      <Box sx={{ flexGrow: 1 }} />
 
       {!collapsed && (
         <Typography
-          textAlign="center"
-          mb={2}
-          fontSize={12}
-          color="rgba(255,255,255,.7)"
+          sx={{ textAlign: "center", mb: 2, fontSize: 12, color: "rgba(255,255,255,.7)" }}
         >
           Version 1.0
         </Typography>
