@@ -5,9 +5,12 @@ import {
   Alert,
   Box,
   Checkbox,
+  Chip,
   FormControlLabel,
   IconButton,
   Link,
+  Paper,
+  Typography,
 } from "@mui/material";
 
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
@@ -106,6 +109,39 @@ export default function LoginForm() {
           {loading ? "Signing In..." : "SIGN IN"}
         </PrimaryButton>
       </Box>
+
+      <Paper
+        sx={{
+          mt: 3,
+          p: 2,
+          bgcolor: "primary.50",
+          border: "1px dashed",
+          borderColor: "primary.200",
+          borderRadius: 3,
+        }}
+      >
+        <Typography variant="caption" sx={{ fontWeight: 600, color: "primary.main", display: "block", mb: 1 }}>
+          Demo Credentials
+        </Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          <Chip
+            label="admin / admin123"
+            size="small"
+            color="primary"
+            variant="outlined"
+            onClick={() => { setUsername("admin"); setPassword("admin123"); }}
+            sx={{ cursor: "pointer" }}
+          />
+          <Chip
+            label="doctor / doctor123"
+            size="small"
+            color="secondary"
+            variant="outlined"
+            onClick={() => { setUsername("doctor"); setPassword("doctor123"); }}
+            sx={{ cursor: "pointer" }}
+          />
+        </Box>
+      </Paper>
     </form>
   );
 }
