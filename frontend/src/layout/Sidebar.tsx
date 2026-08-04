@@ -28,6 +28,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DescriptionIcon from "@mui/icons-material/Description";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import TimelineIcon from "@mui/icons-material/Timeline";
 
 import { useAuth } from "../contexts/AuthContext";
 import type { UserRole } from "../types/auth";
@@ -52,26 +53,27 @@ const menuSections: MenuSection[] = [
     label: "Overview",
     items: [
       { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
+      { text: "Roadmap", path: "/roadmap", icon: <TimelineIcon /> },
     ],
   },
   {
     label: "Clinical",
     items: [
-      { text: "Patients", path: "/patients", icon: <PeopleIcon /> },
+      { text: "Patients", path: "/patients", icon: <PeopleIcon />, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST"] },
       { text: "Doctors", path: "/doctors", icon: <LocalHospitalIcon /> },
       { text: "Departments", path: "/departments", icon: <LocalHospitalIcon /> },
       { text: "Availability", path: "/availability", icon: <EventNoteIcon /> },
-      { text: "Appointments", path: "/appointments", icon: <EventNoteIcon /> },
-      { text: "Medical Records", path: "/medical-records", icon: <DescriptionIcon /> },
-      { text: "Laboratory", path: "/laboratory", icon: <ScienceIcon /> },
-      { text: "Prescriptions", path: "/prescriptions", icon: <MedicationIcon /> },
+      { text: "Appointments", path: "/appointments", icon: <EventNoteIcon />, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST"] },
+      { text: "Medical Records", path: "/medical-records", icon: <DescriptionIcon />, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST"] },
+      { text: "Laboratory", path: "/laboratory", icon: <ScienceIcon />, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST"] },
+      { text: "Prescriptions", path: "/prescriptions", icon: <MedicationIcon />, roles: ["ADMIN", "DOCTOR", "PHARMACIST"] },
     ],
   },
   {
     label: "Financial",
     items: [
-      { text: "Billing", path: "/billing", icon: <ReceiptLongIcon />, roles: ["ADMIN", "RECEPTIONIST"] },
-      { text: "Payments", path: "/payments", icon: <ReceiptLongIcon />, roles: ["ADMIN", "RECEPTIONIST"] },
+      { text: "Billing", path: "/billing", icon: <ReceiptLongIcon />, roles: ["ADMIN", "PHARMACIST"] },
+      { text: "Payments", path: "/payments", icon: <ReceiptLongIcon />, roles: ["ADMIN", "PHARMACIST"] },
     ],
   },
   {

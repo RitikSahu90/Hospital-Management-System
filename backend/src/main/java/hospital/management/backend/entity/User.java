@@ -33,6 +33,7 @@ public class User {
     private Role role;
 
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private boolean active = true;
 
     @Column(name = "last_login_at")

@@ -1,9 +1,9 @@
 import axios from "axios";
 import { getToken } from "./authService";
+import { API_BASE_URL } from "./apiConfig";
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080",
-  headers: { "Content-Type": "application/json" },
+  baseURL: API_BASE_URL,
 });
 
 apiClient.interceptors.request.use((config) => {

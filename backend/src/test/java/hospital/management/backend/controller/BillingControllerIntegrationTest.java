@@ -31,9 +31,17 @@ class BillingControllerIntegrationTest {
     @Autowired
     private PatientRepository patientRepository;
 
+    @Autowired
+    private hospital.management.backend.repository.AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private hospital.management.backend.repository.PaymentRepository paymentRepository;
+
     @BeforeEach
     void setUp() {
+        paymentRepository.deleteAll();
         billingRepository.deleteAll();
+        appointmentRepository.deleteAll();
         patientRepository.deleteAll();
     }
 

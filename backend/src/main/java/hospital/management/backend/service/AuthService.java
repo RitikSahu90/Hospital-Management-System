@@ -42,6 +42,9 @@ public class AuthService {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email address already exists");
+        }
 
         Role role = roleRepository.findByName("PATIENT")
             .orElseGet(() -> roleRepository.save(Role.builder().name("PATIENT").build()));

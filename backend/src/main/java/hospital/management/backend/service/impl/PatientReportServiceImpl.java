@@ -85,15 +85,21 @@ public class PatientReportServiceImpl implements PatientReportService {
 
         @Override
         @Transactional(readOnly = true)
-        public String createDownloadUrl(Long reportId) {
+    public String createDownloadUrl(Long patientId, Long reportId) {
         PatientReport report = reportRepository.findById(reportId)
             .orElseThrow(() -> new IllegalArgumentException("Report not found"));
+        if (!report.getPatient().getId().equals(patientId)) {
+            throw new IllegalArgumentException("Report does not belong to this patient");
+        }
         String bucket = secretsConfig.getAws().getS3Bucket();
+        if (!StringUtils.hasText(bucket)) {
+            throw new IllegalArgumentException("AWS S3 bucket is not configured");
+        }
         GetObjectRequest objectRequest = GetObjectRequest.builder().bucket(bucket).key(report.getReportUrl()).build();
         GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
             .signatureDuration(java.time.Duration.ofMinutes(10)).getObjectRequest(objectRequest).build();
         return s3Presigner.presignGetObject(presignRequest).url().toString();
-        }
+    }
 
     private PatientReportResponse toResponse(PatientReport report) {
         return new PatientReportResponse(report.getId(), report.getPatient().getId(), report.getTitle(),

@@ -24,12 +24,17 @@ public class DoctorMapper {
     public DoctorResponse toResponse(Doctor d) {
         return new DoctorResponse(
                 d.getId(),
+                d.getUser() == null ? null : d.getUser().getId(),
+                d.getDepartment() == null ? null : d.getDepartment().getId(),
+                d.getDoctorCode(),
                 d.getFirstName(),
                 d.getLastName(),
                 d.getLicenseNumber(),
                 d.getSpecialization(),
                 d.getPhone(),
-                d.getConsultationFee()
+                d.getYearsExperience(),
+                d.getConsultationFee(),
+                d.getStatus()
         );
     }
 }

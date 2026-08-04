@@ -17,6 +17,10 @@ export const uploadPatientReport = (patientId: number, title: string, file: File
   formData.append("title", title);
   formData.append("file", file);
   return apiClient.post<PatientReport>(`/api/patients/${patientId}/reports`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: { "Content-Type": undefined },
   }).then((response) => response.data);
 };
+
+export const getPatientReportDownloadUrl = (patientId: number, reportId: number) =>
+  apiClient.get<{ url: string }>(`/api/patients/${patientId}/reports/report/${reportId}/download`)
+    .then((response) => response.data.url);

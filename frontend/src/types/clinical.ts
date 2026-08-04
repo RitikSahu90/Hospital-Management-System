@@ -1,4 +1,5 @@
-export interface Doctor { id: number; firstName: string; lastName: string; licenseNumber: string; specialization: string; phone?: string; consultationFee?: number; }
+export type DoctorStatus = "ACTIVE" | "ON_LEAVE" | "INACTIVE";
+export interface Doctor { id: number; userId: number; departmentId: number; doctorCode: string; firstName: string; lastName: string; licenseNumber: string; specialization: string; phone?: string; yearsExperience: number; consultationFee?: number; status: DoctorStatus; }
 export type DoctorRequest = Omit<Doctor, "id">;
 export interface Availability { id: number; doctorId: number; dayOfWeek: string; startTime: string; endTime: string; }
 export type AvailabilityRequest = Omit<Availability, "id" | "doctorId">;

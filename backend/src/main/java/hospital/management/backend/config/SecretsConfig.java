@@ -30,6 +30,8 @@ public class SecretsConfig {
         private String s3Bucket;
         private String accessKeyId;
         private String secretAccessKey;
+        private String endpoint;
+        private String publicEndpoint;
 
         public String getRegion() {
             return region;
@@ -61,6 +63,22 @@ public class SecretsConfig {
 
         public void setSecretAccessKey(String secretAccessKey) {
             this.secretAccessKey = secretAccessKey;
+        }
+
+        public String getEndpoint() {
+            return endpoint;
+        }
+
+        public void setEndpoint(String endpoint) {
+            this.endpoint = endpoint;
+        }
+
+        public String getPublicEndpoint() {
+            return publicEndpoint;
+        }
+
+        public void setPublicEndpoint(String publicEndpoint) {
+            this.publicEndpoint = publicEndpoint;
         }
     }
 }

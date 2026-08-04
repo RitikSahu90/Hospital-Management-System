@@ -1,6 +1,5 @@
 package hospital.management.backend.controller;
 
-import hospital.management.backend.entity.PatientReport;
 import hospital.management.backend.dto.response.PatientReportResponse;
 import hospital.management.backend.service.PatientReportService;
 import hospital.management.backend.service.PatientService;
@@ -42,7 +41,7 @@ public class PatientReportController {
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT')")
     public ResponseEntity<java.util.Map<String, String>> download(@PathVariable Long patientId, @PathVariable Long reportId, Authentication authentication) {
         ensureOwnership(patientId, authentication);
-        return ResponseEntity.ok(java.util.Map.of("url", reportService.createDownloadUrl(reportId)));
+        return ResponseEntity.ok(java.util.Map.of("url", reportService.createDownloadUrl(patientId, reportId)));
     }
 
     private void ensureOwnership(Long patientId, Authentication authentication) {

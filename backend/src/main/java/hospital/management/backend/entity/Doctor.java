@@ -47,10 +47,12 @@ public class Doctor {
     private String phone;
 
     @Column(name = "years_experience", nullable = false)
+    @Builder.Default
     private Integer yearsExperience = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private DoctorStatus status = DoctorStatus.ACTIVE;
 
     private Double consultationFee;

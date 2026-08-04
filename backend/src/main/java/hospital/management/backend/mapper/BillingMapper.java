@@ -19,7 +19,10 @@ public class BillingMapper {
 
     public BillingResponse toResponse(Billing billing, BigDecimal paidAmount) {
         BigDecimal paid = paidAmount == null ? BigDecimal.ZERO : paidAmount;
-        BigDecimal total = billing.getTotalAmount() == null ? BigDecimal.ZERO : billing.getTotalAmount();
+        BigDecimal total = billing.getTotalAmount();
+        if (total == null) {
+            total = billing.getConsultationFee().add(billing.getMedicineCharges()).add(billing.getOtherCharges());
+        }
         return new BillingResponse(
                 billing.getId(),
                 billing.getPatient().getId(),

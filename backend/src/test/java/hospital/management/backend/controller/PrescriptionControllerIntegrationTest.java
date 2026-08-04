@@ -58,11 +58,15 @@ class PrescriptionControllerIntegrationTest {
     @Autowired private DepartmentRepository departmentRepository;
     @Autowired private AppointmentRepository appointmentRepository;
     @Autowired private MedicalRecordRepository medicalRecordRepository;
+    @Autowired private hospital.management.backend.repository.PaymentRepository paymentRepository;
 
     @BeforeEach
     void setUp() {
+        paymentRepository.deleteAll();
         billingRepository.deleteAll();
         prescriptionRepository.deleteAll();
+        medicalRecordRepository.deleteAll();
+        appointmentRepository.deleteAll();
         patientRepository.deleteAll();
         doctorRepository.deleteAll();
     }

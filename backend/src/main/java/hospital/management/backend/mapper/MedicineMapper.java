@@ -23,10 +23,12 @@ public class MedicineMapper {
     public MedicineResponse toResponse(Medicine medicine, Inventory inventory) {
         return new MedicineResponse(
                 medicine.getId(),
+                medicine.getSupplier() == null ? null : medicine.getSupplier().getId(),
                 medicine.getName(),
                 medicine.getManufacturer(),
                 medicine.getUnitPrice(),
                 inventory == null ? null : inventory.getStockQuantity(),
+                inventory == null ? null : inventory.getReorderLevel(),
                 inventory == null ? null : inventory.getExpiryDate()
         );
     }

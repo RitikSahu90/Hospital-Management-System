@@ -1,7 +1,6 @@
 import axios from "axios";
-import type { AuthResponse, LoginRequest } from "../types/auth";
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+import type { AuthResponse, LoginRequest, RegisterRequest } from "../types/auth";
+import { API_BASE_URL } from "./apiConfig";
 
 const authApi = axios.create({
   baseURL: API_BASE_URL,
@@ -12,6 +11,11 @@ const authApi = axios.create({
 
 export const login = async (credentials: LoginRequest): Promise<AuthResponse> => {
   const response = await authApi.post<AuthResponse>("/api/auth/login", credentials);
+  return response.data;
+};
+
+export const register = async (details: RegisterRequest): Promise<AuthResponse> => {
+  const response = await authApi.post<AuthResponse>("/api/auth/register", details);
   return response.data;
 };
 

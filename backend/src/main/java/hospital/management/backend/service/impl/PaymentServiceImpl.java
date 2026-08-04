@@ -30,7 +30,10 @@ public class PaymentServiceImpl implements PaymentService {
                 .map(Payment::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal total = bill.getTotalAmount();
-        if (total == null || paid.add(request.getAmount()).compareTo(total) > 0) {
+        if (total == null) {
+            total = bill.getConsultationFee().add(bill.getMedicineCharges()).add(bill.getOtherCharges());
+        }
+        if (paid.add(request.getAmount()).compareTo(total) > 0) {
             throw new IllegalArgumentException("Payment exceeds the bill total");
         }
 
