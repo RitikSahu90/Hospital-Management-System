@@ -1,14 +1,270 @@
 import { useEffect, useState } from "react";
-import { Alert, Box, CircularProgress, Grid, Paper, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  CircularProgress,
+  Grid,
+  Paper,
+  Typography,
+  Chip,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Divider,
+} from "@mui/material";
+import {
+  People as PeopleIcon,
+  LocalHospital as DoctorIcon,
+  EventNote as AppointmentIcon,
+  Payments as RevenueIcon,
+  TrendingUp,
+} from "@mui/icons-material";
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import { getDashboardSummary } from "../services/dashboardService";
 import type { DashboardSummary } from "../services/dashboardService";
+
+const STATUS_COLORS: Record<string, string> = {
+  SCHEDULED: "#1565C0",
+  CONFIRMED: "#42A5F5",
+  COMPLETED: "#2E7D32",
+  CANCELLED: "#C62828",
+  NO_SHOW: "#F57C00",
+};
+
+const METRIC_ICONS: Record<string, React.ReactNode> = {
+  Patients: <PeopleIcon />,
+  Doctors: <DoctorIcon />,
+  Appointments: <AppointmentIcon />,
+  Revenue: <RevenueIcon />,
+};
+
+const METRIC_COLORS: Record<string, string> = {
+  Patients: "#1565C0",
+  Doctors: "#00897B",
+  Appointments: "#7B1FA2",
+  Revenue: "#EF6C00",
+};
 
 export default function Dashboard() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [error, setError] = useState("");
-  useEffect(() => { getDashboardSummary().then(setSummary).catch(() => setError("Unable to load dashboard data.")); }, []);
-  if (error) return <Box sx={{ p: 3 }}><Alert severity="error">{error}</Alert></Box>;
-  if (!summary) return <Box sx={{ display: "flex", justifyContent: "center", p: 8 }}><CircularProgress /></Box>;
-  const metrics = [["Patients", summary.patientCount], ["Doctors", summary.doctorCount], ["Appointments", summary.appointmentCount], ["Revenue", summary.revenue]];
-  return <Box sx={{ p: 3 }}><Typography variant="h4" sx={{ fontWeight: "bold", mb: 3 }}>Dashboard</Typography><Grid container spacing={3}>{metrics.map(([label, value]) => <Grid key={String(label)} size={{ xs: 12, sm: 6, lg: 3 }}><Paper sx={{ p: 3 }}><Typography color="text.secondary">{label}</Typography><Typography variant="h4">{label === "Revenue" ? Number(value).toFixed(2) : value}</Typography></Paper></Grid>)}<Grid size={{ xs: 12 }}><Paper sx={{ p: 3 }}><Typography variant="h6" sx={{ mb: 2 }}>Appointments by status</Typography>{Object.entries(summary.appointmentsByStatus).map(([status, count]) => <Box key={status} sx={{ display: "flex", justifyContent: "space-between", py: 1 }}><Typography>{status}</Typography><Typography>{count}</Typography></Box>)}</Paper></Grid></Grid></Box>;
+
+  useEffect(() => {
+    getDashboardSummary()
+      .then(setSummary)
+      .catch(() => setError("Unable to load dashboard data."));
+  }, []);
+
+  if (error)
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
+
+  if (!summary)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", p: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+
+  const metrics: [string, number | string][] = [
+    ["Patients", summary.patientCount],
+    ["Doctors", summary.doctorCount],
+    ["Appointments", summary.appointmentCount],
+    ["Revenue", summary.revenue],
+  ];
+
+  const chartData = Object.entries(summary.appointmentsByStatus).map(([status, count]) => ({
+    name: status,
+    value: count,
+    color: STATUS_COLORS[status] || "#999",
+  }));
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
+        <TrendingUp color="primary" />
+        <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+          Dashboard
+        </Typography>
+      </Box>
+
+      {/* Metric Cards */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        {metrics.map(([label, value]) => (
+          <Grid key={String(label)} size={{ xs: 12, sm: 6, lg: 3 }}>
+            <Paper
+              sx={{
+                p: 3,
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                },
+              }}
+            >
+              <Avatar
+                sx={{
+                  bgcolor: `${METRIC_COLORS[label]}15`,
+                  color: METRIC_COLORS[label],
+                  width: 56,
+                  height: 56,
+                }}
+              >
+                {METRIC_ICONS[label]}
+              </Avatar>
+              <Box>
+                <Typography color="text.secondary" variant="body2">
+                  {label}
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                  {label === "Revenue"
+                    ? `₹${Number(value).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : value}
+                </Typography>
+              </Box>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Charts */}
+      <Grid container spacing={3}>
+        {/* Bar Chart */}
+        <Grid size={{ xs: 12, lg: 7 }}>
+          <Paper sx={{ p: 3, height: 380 }}>
+            <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+              Appointments by Status
+            </Typography>
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid #E0E0E0",
+                      fontSize: 13,
+                    }}
+                  />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: 300 }}>
+                <Typography color="text.secondary">No appointment data available</Typography>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* Pie Chart */}
+        <Grid size={{ xs: 12, lg: 5 }}>
+          <Paper sx={{ p: 3, height: 380 }}>
+            <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+              Status Distribution
+            </Typography>
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    innerRadius={50}
+                    paddingAngle={3}
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid #E0E0E0",
+                      fontSize: 13,
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: 300 }}>
+                <Typography color="text.secondary">No data available</Typography>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* Status Summary List */}
+        <Grid size={{ xs: 12 }}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+              Appointment Status Breakdown
+            </Typography>
+            <List>
+              {Object.entries(summary.appointmentsByStatus).map(([status, count], index, arr) => (
+                <Box key={status}>
+                  <ListItem
+                    sx={{ px: 0 }}
+                    secondaryAction={
+                      <Chip
+                        label={count}
+                        sx={{
+                          bgcolor: `${STATUS_COLORS[status] || "#999"}15`,
+                          color: STATUS_COLORS[status] || "#999",
+                          fontWeight: 700,
+                          fontSize: 16,
+                          px: 1,
+                        }}
+                      />
+                    }
+                  >
+                    <ListItemAvatar>
+                      <Avatar sx={{ bgcolor: `${STATUS_COLORS[status] || "#999"}20`, color: STATUS_COLORS[status] || "#999" }}>
+                        <AppointmentIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={status}
+                      slotProps={{ primary: { sx: { fontWeight: 600, fontSize: 15 } } }}
+                    />
+                  </ListItem>
+                  {index < arr.length - 1 && <Divider />}
+                </Box>
+              ))}
+            </List>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
+  );
 }

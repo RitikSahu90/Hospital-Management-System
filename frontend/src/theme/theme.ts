@@ -7,10 +7,35 @@ const theme = createTheme({
 
     primary: {
       main: "#1565C0",
+      light: "#42A5F5",
+      dark: "#0D47A1",
+      50: "#E3F2FD",
+      100: "#BBDEFB",
+      200: "#90CAF9",
     },
 
     secondary: {
       main: "#42A5F5",
+    },
+
+    success: {
+      main: "#2E7D32",
+      light: "#4CAF50",
+    },
+
+    warning: {
+      main: "#ED6C02",
+      light: "#FF9800",
+    },
+
+    error: {
+      main: "#C62828",
+      light: "#EF5350",
+    },
+
+    info: {
+      main: "#0288D1",
+      light: "#29B6F6",
     },
 
     background: {
