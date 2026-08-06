@@ -11,4 +11,5 @@ public interface BillingService {
     void delete(Long id);
     BillingResponse findById(Long id);
     List<BillingResponse> findAll();
+    List<BillingResponse> findAllForPatient(String patientUsername);
 }

@@ -8,9 +8,19 @@ interface Props {
   patients: Patient[];
   onEdit: (patient: Patient) => void;
   onDelete: (patient: Patient) => void;
+  onAssignDoctor: (patient: Patient) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
-export default function PatientTable({ patients, onEdit, onDelete }: Props) {
+export default function PatientTable({
+  patients,
+  onEdit,
+  onDelete,
+  onAssignDoctor,
+  canEdit = true,
+  canDelete = true,
+}: Props) {
   const columns: GridColDef[] = [
     {
       field: "id",
@@ -50,13 +60,73 @@ export default function PatientTable({ patients, onEdit, onDelete }: Props) {
         );
       },
     },
+    ...(canEdit
+      ? [
+          {
+            field: "doctorAssign",
+            headerName: "Doctor Assign",
+            width: 220,
+            sortable: false,
+            renderCell: (params: any) => {
+              const name = params.row.assignedDoctorName;
+              return name ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, pt: 0.8 }}>
+                  <Typography variant="body2" sx={{ fontWeight: "medium" }}>
+                    {name}
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="text"
+                    onClick={() => onAssignDoctor(params.row as Patient)}
+                  >
+                    Change
+                  </Button>
+                </Box>
+              ) : (
+                <Box sx={{ pt: 0.8 }}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => onAssignDoctor(params.row as Patient)}
+                  >
+                    Assign Doctor
+                  </Button>
+                </Box>
+              );
+            },
+          },
+        ]
+      : []),
     {
-      field: "actions",
-      headerName: "Actions",
-      width: 180,
-      sortable: false,
-      renderCell: (params) => <Box sx={{ display: "flex", gap: 1, pt: 0.8 }}><Button size="small" onClick={() => onEdit(params.row as Patient)}>Edit</Button><Button size="small" color="error" onClick={() => onDelete(params.row as Patient)}>Delete</Button></Box>,
+      field: "assignDate",
+      headerName: "Assign Date",
+      width: 150,
+      valueGetter: (_, row) => (row as any).assignDate || "—",
     },
+    ...(canEdit || canDelete
+      ? [
+          {
+            field: "actions",
+            headerName: "Actions",
+            width: 180,
+            sortable: false,
+            renderCell: (params: any) => (
+              <Box sx={{ display: "flex", gap: 1, pt: 0.8 }}>
+                {canEdit && (
+                  <Button size="small" onClick={() => onEdit(params.row as Patient)}>
+                    Edit
+                  </Button>
+                )}
+                {canDelete && (
+                  <Button color="error" size="small" onClick={() => onDelete(params.row as Patient)}>
+                    Delete
+                  </Button>
+                )}
+              </Box>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (

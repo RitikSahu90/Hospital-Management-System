@@ -9,12 +9,14 @@ interface Props {
   search: string;
   setSearch: (value: string) => void;
   onAdd: () => void;
+  showAdd?: boolean;
 }
 
 export default function PatientToolbar({
   search,
   setSearch,
   onAdd,
+  showAdd = true,
 }: Props) {
   return (
     <Box
@@ -28,13 +30,15 @@ export default function PatientToolbar({
         sx={{ width: 300 }}
       />
 
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={onAdd}
-      >
-        Add Patient
-      </Button>
+      {showAdd && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={onAdd}
+        >
+          Add Patient
+        </Button>
+      )}
     </Box>
   );
 }

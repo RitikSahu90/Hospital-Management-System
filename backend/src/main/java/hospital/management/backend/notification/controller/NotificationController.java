@@ -1,13 +1,14 @@
 package hospital.management.backend.notification.controller;
 
+import hospital.management.backend.dto.response.NotificationResponse;
 import hospital.management.backend.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -38,5 +39,11 @@ public class NotificationController {
     public ResponseEntity<String> billGenerated(@RequestBody Map<String, String> payload) {
         notificationService.notifyBillGenerated(payload.get("recipient"), payload.get("message"));
         return ResponseEntity.ok("Notification requested");
+    }
+
+    @GetMapping("/patient")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<NotificationResponse>> getPatientNotifications(Authentication authentication) {
+        return ResponseEntity.ok(notificationService.getNotificationsForPatient(authentication.getName()));
     }
 }

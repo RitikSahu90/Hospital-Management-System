@@ -81,4 +81,24 @@ public class AppointmentServiceImpl implements AppointmentService {
     public List<AppointmentResponse> findAll() {
         return appointmentRepository.findAll().stream().map(mapper::toResponse).collect(Collectors.toList());
     }
+
+    @Override
+    public List<AppointmentResponse> findAllForDoctor(String doctorUsername) {
+        Doctor doctor = doctorRepository.findByUserUsername(doctorUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Doctor profile not found"));
+        return appointmentRepository.findAll().stream()
+                .filter(app -> app.getDoctor() != null && app.getDoctor().getId().equals(doctor.getId()))
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AppointmentResponse> findAllForPatient(String patientUsername) {
+        Patient patient = patientRepository.findByUserUsername(patientUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Patient profile not found"));
+        return appointmentRepository.findAll().stream()
+                .filter(app -> app.getPatient() != null && app.getPatient().getId().equals(patient.getId()))
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
 }

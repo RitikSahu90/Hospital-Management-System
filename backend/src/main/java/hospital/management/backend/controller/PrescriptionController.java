@@ -45,8 +45,24 @@ public class PrescriptionController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PHARMACIST')")
-    public ResponseEntity<List<PrescriptionResponse>> listPrescriptions() {
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PHARMACIST','PATIENT')")
+    public ResponseEntity<List<PrescriptionResponse>> listPrescriptions(org.springframework.security.core.Authentication authentication) {
+        if (authentication != null && authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_PATIENT"))) {
+            return ResponseEntity.ok(prescriptionService.findAllForPatient(authentication.getName()));
+        }
         return ResponseEntity.ok(prescriptionService.findAll());
+    }
+
+    @PostMapping("/{id}/upload-pdf")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PHARMACIST')")
+    public ResponseEntity<PrescriptionResponse> uploadPdf(@PathVariable Long id,
+                                                          @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        return ResponseEntity.ok(prescriptionService.uploadPdf(id, file));
+    }
+
+    @GetMapping("/{id}/download")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PHARMACIST','PATIENT')")
+    public ResponseEntity<java.util.Map<String, String>> download(@PathVariable Long id) {
+        return ResponseEntity.ok(java.util.Map.of("url", prescriptionService.createDownloadUrl(id)));
     }
 }

@@ -19,6 +19,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PatientServiceTest {
     @Mock private PatientRepository patientRepository;
+    @Mock private hospital.management.backend.repository.DoctorRepository doctorRepository;
+    @Mock private hospital.management.backend.repository.AppointmentRepository appointmentRepository;
     @InjectMocks private PatientService patientService;
 
     private Patient patient(Long id) {

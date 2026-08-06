@@ -48,8 +48,13 @@ export default function LoginForm() {
       const response = isRegistering
         ? await registerRequest({ username, email, password })
         : await loginRequest({ username, password });
-      login(response.token, response.username, response.role || "PATIENT");
-      navigate("/dashboard");
+      const role = response.role || "PATIENT";
+      login(response.token, response.username, role);
+      if (role === "PHARMACIST") {
+        navigate("/prescriptions");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       setError(isRegistering ? "Unable to create your account. The username or email may already be in use." : "Invalid username or password.");
     } finally {
@@ -160,22 +165,65 @@ export default function LoginForm() {
           Demo Credentials
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          <Chip
-            label="admin / admin123"
-            size="small"
-            color="primary"
-            variant="outlined"
-            onClick={() => { setUsername("admin"); setPassword("admin123"); }}
-            sx={{ cursor: "pointer" }}
-          />
-          <Chip
-            label="doctor / doctor123"
-            size="small"
-            color="secondary"
-            variant="outlined"
-            onClick={() => { setUsername("doctor"); setPassword("doctor123"); }}
-            sx={{ cursor: "pointer" }}
-          />
+        <Chip
+          label="admin / admin123"
+          size="small"
+          color="primary"
+          variant="outlined"
+          onClick={() => {
+            setUsername("admin");
+            setPassword("admin123");
+          }}
+          sx={{ cursor: "pointer" }}
+        />
+
+        <Chip
+          label="doctor / doctor123"
+          size="small"
+          color="secondary"
+          variant="outlined"
+          onClick={() => {
+            setUsername("doctor");
+            setPassword("doctor123");
+          }}
+          sx={{ cursor: "pointer" }}
+        />
+
+        <Chip
+          label="receptionist / receptionist123"
+          size="small"
+          color="success"
+          variant="outlined"
+          onClick={() => {
+            setUsername("receptionist");
+            setPassword("receptionist123");
+          }}
+          sx={{ cursor: "pointer" }}
+        />
+
+        <Chip
+          label="pharmacist / pharmacist123"
+          size="small"
+          color="warning"
+          variant="outlined"
+          onClick={() => {
+            setUsername("pharmacist");
+            setPassword("pharmacist123");
+          }}
+          sx={{ cursor: "pointer" }}
+        />
+
+        <Chip
+          label="patient / patient123"
+          size="small"
+          color="info"
+          variant="outlined"
+          onClick={() => {
+            setUsername("patient");
+            setPassword("patient123");
+          }}
+          sx={{ cursor: "pointer" }}
+        />
         </Box>
       </Paper>}
     </form>

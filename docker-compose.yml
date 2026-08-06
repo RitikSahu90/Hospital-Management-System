@@ -1,84 +1,26 @@
+version: '3.8'
+
 services:
-  mysql:
-    image: mysql:8.4
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-hospital_management}
-      MYSQL_USER: ${MYSQL_USER:-appuser}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppassword}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./database:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-
-  minio:
-    image: minio/minio:latest
-    command: server /data --console-address ":9001"
-    restart: unless-stopped
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-    volumes:
-      - minio_data:/data
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-
-  minio-init:
-    image: minio/mc:latest
-    depends_on:
-      - minio
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-hospital-reports}
-    entrypoint: >
-      /bin/sh -c "until mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD; do sleep 2; done;
-      mc mb --ignore-existing local/$$AWS_S3_BUCKET"
-
   backend:
     build:
       context: ./backend
-    restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
-      minio-init:
-        condition: service_completed_successfully
-    environment:
-      APP_PROFILE: prod
-      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-hospital_management}
-      DB_USERNAME: ${MYSQL_USER:-appuser}
-      DB_PASSWORD: ${MYSQL_PASSWORD:-apppassword}
-      JPA_DDL_AUTO: validate
-      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env before starting Docker Compose}
-      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
-      APP_ENVIRONMENT: prod
-      AWS_REGION: ${AWS_REGION:-us-east-1}
-      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-hospital-reports}
-      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
-      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
-      AWS_ENDPOINT: http://minio:9000
-      AWS_PUBLIC_ENDPOINT: http://localhost:9000
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      - APP_PROFILE=dev
+      - AWS_REGION=ap-south-1
+      - AWS_S3_BUCKET=hospital-management-files-m
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - ./backend/data:/app/data
 
   frontend:
     build:
       context: ./frontend
-    restart: unless-stopped
-    depends_on:
-      - backend
+      dockerfile: Dockerfile
     ports:
       - "80:80"
-
-volumes:
-  mysql_data:
-  minio_data:
+    depends_on:
+      - backend

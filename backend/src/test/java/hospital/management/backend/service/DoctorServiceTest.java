@@ -176,7 +176,7 @@ class DoctorServiceTest {
     void shouldAddAndGetAvailability() {
         Doctor doctor = Doctor.builder().id(5L).firstName("Anita").lastName("Das").build();
         AvailabilityRequest request = new AvailabilityRequest();
-        request.setDayOfWeek(DayOfWeek.MONDAY);
+        request.setDayOfWeek(AvailabilityDay.MON);
         request.setStartTime(LocalTime.of(9, 0));
         request.setEndTime(LocalTime.of(12, 0));
 
@@ -184,7 +184,7 @@ class DoctorServiceTest {
         DoctorAvailability availability = new DoctorAvailability();
         availability.setId(11L);
         availability.setDoctor(doctor);
-        availability.setDayOfWeek(DayOfWeek.MONDAY);
+        availability.setDayOfWeek(AvailabilityDay.MON);
         availability.setStartTime(LocalTime.of(9, 0));
         availability.setEndTime(LocalTime.of(12, 0));
         when(availabilityRepository.save(any(DoctorAvailability.class))).thenReturn(availability);
@@ -202,7 +202,7 @@ class DoctorServiceTest {
     @Test
     void shouldThrowWhenAddingAvailabilityForNonExistentDoctor() {
         AvailabilityRequest request = new AvailabilityRequest();
-        request.setDayOfWeek(DayOfWeek.MONDAY);
+        request.setDayOfWeek(AvailabilityDay.MON);
         request.setStartTime(LocalTime.of(9, 0));
         request.setEndTime(LocalTime.of(12, 0));
 

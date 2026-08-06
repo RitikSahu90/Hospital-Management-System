@@ -39,7 +39,7 @@ public class Billing {
     @Column(name = "other_charges", nullable = false)
     @Builder.Default private BigDecimal otherCharges = BigDecimal.ZERO;
 
-    @Column(name = "total_amount", insertable = false, updatable = false)
+    @org.hibernate.annotations.Formula("consultation_fee + medicine_charges + other_charges")
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)

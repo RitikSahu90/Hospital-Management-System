@@ -24,7 +24,8 @@ public class PrescriptionMapper {
                 prescription.getMedicalRecord().getId(),
                 prescription.getItems().stream().map(item -> new PrescriptionItemResponse(
                     item.getId(), item.getMedicine().getId(), item.getDosage(), item.getDurationDays(), item.getQuantity())).toList(),
-                prescription.getNotes()
+                prescription.getNotes(),
+                prescription.getPdfUrl()
         );
     }
 }

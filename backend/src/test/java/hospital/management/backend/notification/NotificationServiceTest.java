@@ -16,7 +16,9 @@ class NotificationServiceTest {
     @Test
     void shouldPublishAppointmentCreatedEvent() {
         ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
-        NotificationService service = new NotificationService(publisher);
+        hospital.management.backend.repository.NotificationRepository notificationRepository = mock(hospital.management.backend.repository.NotificationRepository.class);
+        hospital.management.backend.repository.PatientRepository patientRepository = mock(hospital.management.backend.repository.PatientRepository.class);
+        NotificationService service = new NotificationService(publisher, notificationRepository, patientRepository);
 
         service.notifyAppointmentCreated("patient@example.com", "Your appointment is confirmed");
 
@@ -33,7 +35,9 @@ class NotificationServiceTest {
     @Test
     void shouldPublishAppointmentCancelledEvent() {
         ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
-        NotificationService service = new NotificationService(publisher);
+        hospital.management.backend.repository.NotificationRepository notificationRepository = mock(hospital.management.backend.repository.NotificationRepository.class);
+        hospital.management.backend.repository.PatientRepository patientRepository = mock(hospital.management.backend.repository.PatientRepository.class);
+        NotificationService service = new NotificationService(publisher, notificationRepository, patientRepository);
 
         service.notifyAppointmentCancelled("patient@example.com", "Your appointment has been cancelled");
 
@@ -50,7 +54,9 @@ class NotificationServiceTest {
     @Test
     void shouldPublishAppointmentReminderEvent() {
         ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
-        NotificationService service = new NotificationService(publisher);
+        hospital.management.backend.repository.NotificationRepository notificationRepository = mock(hospital.management.backend.repository.NotificationRepository.class);
+        hospital.management.backend.repository.PatientRepository patientRepository = mock(hospital.management.backend.repository.PatientRepository.class);
+        NotificationService service = new NotificationService(publisher, notificationRepository, patientRepository);
 
         service.notifyAppointmentReminder("patient@example.com", "Reminder: appointment tomorrow");
 
@@ -67,7 +73,9 @@ class NotificationServiceTest {
     @Test
     void shouldPublishBillGeneratedEvent() {
         ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
-        NotificationService service = new NotificationService(publisher);
+        hospital.management.backend.repository.NotificationRepository notificationRepository = mock(hospital.management.backend.repository.NotificationRepository.class);
+        hospital.management.backend.repository.PatientRepository patientRepository = mock(hospital.management.backend.repository.PatientRepository.class);
+        NotificationService service = new NotificationService(publisher, notificationRepository, patientRepository);
 
         service.notifyBillGenerated("patient@example.com", "Your bill has been generated");
 

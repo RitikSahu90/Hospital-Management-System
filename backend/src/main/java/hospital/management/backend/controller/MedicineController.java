@@ -39,13 +39,13 @@ public class MedicineController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','PHARMACIST')")
+    @PreAuthorize("hasAnyRole('ADMIN','PHARMACIST','DOCTOR','PATIENT')")
     public ResponseEntity<MedicineResponse> getMedicine(@PathVariable Long id) {
         return ResponseEntity.ok(medicineService.findById(id));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','PHARMACIST')")
+    @PreAuthorize("hasAnyRole('ADMIN','PHARMACIST','DOCTOR','PATIENT')")
     public ResponseEntity<List<MedicineResponse>> listMedicines() {
         return ResponseEntity.ok(medicineService.findAll());
     }

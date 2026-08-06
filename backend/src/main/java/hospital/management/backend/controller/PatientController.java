@@ -20,8 +20,15 @@ public class PatientController {
 
     @GetMapping
     public ResponseEntity<List<?>> getPatients(Authentication authentication) {
-        if (authentication != null && authentication.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_PATIENT"))) {
-            return ResponseEntity.ok(List.of(patientService.findForUsername(authentication.getName())));
+        if (authentication != null) {
+            boolean isPatient = authentication.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_PATIENT"));
+            if (isPatient) {
+                return ResponseEntity.ok(List.of(patientService.findForUsername(authentication.getName())));
+            }
+            boolean isDoctor = authentication.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_DOCTOR"));
+            if (isDoctor) {
+                return ResponseEntity.ok(patientService.findAllForDoctor(authentication.getName()));
+            }
         }
         return ResponseEntity.ok(patientService.findAll());
     }
@@ -41,10 +48,8 @@ public class PatientController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT')")
-    public ResponseEntity<?> updatePatient(@PathVariable Long id, @Valid @RequestBody Patient patient, Authentication authentication) {
-        boolean patientRole = authentication.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_PATIENT"));
-        if (patientRole && !patientService.belongsToUser(id, authentication.getName())) return ResponseEntity.status(403).body(java.util.Map.of("error", "Forbidden"));
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST')")
+    public ResponseEntity<?> updatePatient(@PathVariable Long id, @Valid @RequestBody Patient patient) {
         return ResponseEntity.ok(patientService.update(id, patient));
     }
 

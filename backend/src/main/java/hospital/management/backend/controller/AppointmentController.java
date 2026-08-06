@@ -45,8 +45,18 @@ public class AppointmentController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST')")
-    public ResponseEntity<List<AppointmentResponse>> getAllAppointments() {
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT')")
+    public ResponseEntity<List<AppointmentResponse>> getAllAppointments(org.springframework.security.core.Authentication authentication) {
+        if (authentication != null) {
+            boolean isDoctor = authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_DOCTOR"));
+            if (isDoctor) {
+                return ResponseEntity.ok(appointmentService.findAllForDoctor(authentication.getName()));
+            }
+            boolean isPatient = authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_PATIENT"));
+            if (isPatient) {
+                return ResponseEntity.ok(appointmentService.findAllForPatient(authentication.getName()));
+            }
+        }
         return ResponseEntity.ok(appointmentService.findAll());
     }
 }

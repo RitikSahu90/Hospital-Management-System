@@ -105,8 +105,12 @@ export default function ApiResourcePage<T extends Row>({ title, fields, load, cr
       const saved = editing && update ? await update(editing.id, payload) : await create(payload);
       setRows((current) => editing ? current.map((row) => row.id === saved.id ? saved : row) : [saved, ...current]);
       setOpen(false);
-    } catch { setError(`Unable to save ${title.slice(0, -1).toLowerCase()}. Check the values and your permissions.`); }
-    finally { setSaving(false); }
+    } catch (err: any) {
+      const msg = err.response?.data?.error || `Unable to save ${title.slice(0, -1).toLowerCase()}. Check the values and your permissions.`;
+      setError(msg);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const removeRow = async (id: number) => {
@@ -221,7 +225,7 @@ export default function ApiResourcePage<T extends Row>({ title, fields, load, cr
         <DialogTitle>{editing ? "Edit" : "Add"} {title.slice(0, -1)}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "grid", gap: 2, pt: 1 }}>
-            {fields.map((field) => (
+            {fields.filter((field) => field.key !== "id").map((field) => (
               <TextField
                 key={field.key}
                 label={field.label}

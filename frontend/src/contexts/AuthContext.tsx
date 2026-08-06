@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { clearToken, getToken, setToken } from "../services/authService";
 import type { AuthUser, UserRole } from "../types/auth";
@@ -13,18 +13,18 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isAuthenticatedState, setIsAuthenticatedState] = useState(false);
-
-  useEffect(() => {
+  const [user, setUser] = useState<AuthUser | null>(() => {
     const token = getToken();
     if (token) {
       const username = localStorage.getItem("username") || "user";
       const role = (localStorage.getItem("role") as UserRole | null) || "PATIENT";
-      setUser({ username, role });
-      setIsAuthenticatedState(true);
+      return { username, role };
     }
-  }, []);
+    return null;
+  });
+  const [isAuthenticatedState, setIsAuthenticatedState] = useState(() => {
+    return Boolean(getToken());
+  });
 
   const login = (token: string, username: string, role: UserRole) => {
     setToken(token);

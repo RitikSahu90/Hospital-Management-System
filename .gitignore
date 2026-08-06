@@ -15,3 +15,6 @@ dist/
 # Logs
 *.log
 .env
+
+# Database files
+backend/data/

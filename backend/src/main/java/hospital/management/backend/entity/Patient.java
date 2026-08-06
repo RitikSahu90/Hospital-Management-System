@@ -58,6 +58,8 @@ public class Patient {
     @Column(name = "blood_group", length = 5)
     private String bloodGroup;
 
+    private String diagnosis;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 

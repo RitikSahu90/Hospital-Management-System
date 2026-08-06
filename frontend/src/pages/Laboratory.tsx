@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
-  Autocomplete,
   Avatar,
   Box,
   Button,
@@ -33,7 +32,9 @@ import {
   ContactPage as ContactIcon,
 } from "@mui/icons-material";
 import { getPatientReportDownloadUrl, getPatientReports, uploadPatientReport } from "../services/reportService";
+import { uploadDocument, getPatientDocuments } from "../services/documentService";
 import { getPatients } from "../services/patientService";
+import { useAuth } from "../contexts/AuthContext";
 import type { Patient } from "../types/patient";
 import type { PatientReport } from "../services/reportService";
 
@@ -46,12 +47,15 @@ const calculateAge = (dobString?: string): string => {
 };
 
 export default function Laboratory() {
+  const { user } = useAuth();
+  const isPharmacist = user?.role === "PHARMACIST";
+  const isPatient = user?.role === "PATIENT";
+
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [reports, setReports] = useState<PatientReport[]>([]);
-  const [loadingPatients, setLoadingPatients] = useState(false);
   const [loadingReports, setLoadingReports] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -61,22 +65,39 @@ export default function Laboratory() {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const fetchPatientsList = async () => {
-      try {
-        setLoadingPatients(true);
-        setError("");
-        const data = await getPatients();
-        setPatients(data);
-      } catch (err) {
-        console.error(err);
-        setError("Unable to load patient records. Please verify API service connectivity.");
-      } finally {
-        setLoadingPatients(false);
-      }
-    };
-    void fetchPatientsList();
-  }, []);
+  // Split Patient Search inputs
+  const [patientNameInput, setPatientNameInput] = useState("");
+  const [patientMobileInput, setPatientMobileInput] = useState("");
+  const [patientSearchStatus, setPatientSearchStatus] = useState<"IDLE" | "SUCCESS" | "NOT_FOUND" | "MULTIPLE">("IDLE");
+
+  const handleSearchPatient = () => {
+    if (!patientNameInput && !patientMobileInput) {
+      setError("Please enter a name or mobile number to search.");
+      setPatientSearchStatus("IDLE");
+      void handlePatientChange(null);
+      return;
+    }
+    setError("");
+    setSuccess("");
+
+    const results = patients.filter((p) => {
+      const fullName = `${p.firstName} ${p.lastName}`.toLowerCase();
+      const matchName = !patientNameInput || fullName.includes(patientNameInput.toLowerCase());
+      const matchMobile = !patientMobileInput || p.phone.includes(patientMobileInput);
+      return matchName && matchMobile;
+    });
+
+    if (results.length === 1) {
+      void handlePatientChange(results[0]);
+      setPatientSearchStatus("SUCCESS");
+    } else if (results.length > 1) {
+      void handlePatientChange(null);
+      setPatientSearchStatus("MULTIPLE");
+    } else {
+      void handlePatientChange(null);
+      setPatientSearchStatus("NOT_FOUND");
+    }
+  };
 
   const handlePatientChange = useCallback(async (patient: Patient | null) => {
     setSelectedPatient(patient);
@@ -92,14 +113,45 @@ export default function Laboratory() {
 
     try {
       setLoadingReports(true);
-      const data = await getPatientReports(patient.id);
-      setReports(data);
+      if (isPatient) {
+        // Fetch from S3 DocumentMetadata table!
+        const docs = await getPatientDocuments("REPORT");
+        const mappedReports = docs.map((doc) => ({
+          id: doc.id,
+          patientId: doc.patientId,
+          title: doc.documentName,
+          reportUrl: doc.downloadUrl, // Secure presigned URL!
+          createdAt: doc.timestamp,
+          updatedAt: doc.timestamp,
+        }));
+        setReports(mappedReports);
+      } else {
+        const data = await getPatientReports(patient.id);
+        setReports(data);
+      }
     } catch {
       setError("Unable to load laboratory reports for this patient.");
     } finally {
       setLoadingReports(false);
     }
-  }, []);
+  }, [isPatient]);
+
+  useEffect(() => {
+    const fetchPatientsList = async () => {
+      try {
+        setError("");
+        const data = await getPatients();
+        setPatients(data);
+        if (user?.role === "PATIENT" && data && data.length > 0) {
+          void handlePatientChange(data[0]);
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Unable to load patient records. Please verify API service connectivity.");
+      }
+    };
+    void fetchPatientsList();
+  }, [user, handlePatientChange]);
 
   const handleUpload = useCallback(async () => {
     if (!selectedPatient) return;
@@ -112,7 +164,14 @@ export default function Laboratory() {
       setUploading(true);
       setError("");
       setSuccess("");
+      // 1. Upload to original PatientReport table
       const report = await uploadPatientReport(selectedPatient.id, title.trim(), file);
+      // 2. Also upload to structural DocumentMetadata table!
+      try {
+        await uploadDocument(selectedPatient.id, "REPORT", title.trim(), file);
+      } catch (e) {
+        console.error("DocumentMetadata upload failed", e);
+      }
       setReports((current) => [report, ...current]);
       setSuccess(`Report "${title}" uploaded successfully!`);
       setTitle("");
@@ -128,14 +187,19 @@ export default function Laboratory() {
     try {
       setError("");
       setDownloadingReportId(report.id);
-      const url = await getPatientReportDownloadUrl(report.patientId, report.id);
-      window.open(url, "_blank", "noopener,noreferrer");
+      if (isPatient) {
+        // For patient, reportUrl is already the secure presigned URL!
+        window.open(report.reportUrl, "_blank", "noopener,noreferrer");
+      } else {
+        const url = await getPatientReportDownloadUrl(report.patientId, report.id);
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
     } catch {
       setError("Unable to retrieve report download link from S3 storage.");
     } finally {
       setDownloadingReportId(null);
     }
-  }, []);
+  }, [isPatient]);
 
   const filteredReports = useMemo(() => {
     const keyword = reportSearch.toLowerCase();
@@ -194,10 +258,14 @@ export default function Laboratory() {
     <Box sx={{ p: 3 }}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 800, color: "primary.dark", mb: 1 }}>
-          Laboratory & Diagnostics
+          {isPatient ? "Reports" : isPharmacist ? "Reports & Uploads" : "Laboratory & Diagnostics"}
         </Typography>
         <Typography color="text.secondary">
-          Select a patient profile to review diagnostic history, upload report scan files, and retrieve stored records.
+          {isPatient
+            ? "View and download your official medical reports, laboratory test results, and diagnostic records."
+            : isPharmacist
+            ? "Search for a patient profile to review diagnostic history, upload medical reports, and retrieve stored records."
+            : "Select a patient profile to review diagnostic history, upload report scan files, and retrieve stored records."}
         </Typography>
       </Box>
 
@@ -261,44 +329,60 @@ export default function Laboratory() {
       )}
 
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 5 }}>
+        {!isPatient && (
+          <Grid size={{ xs: 12, md: 5 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <Card sx={{ borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+              <CardContent sx={{ p: 3, display: "grid", gap: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
                   Search Patient
                 </Typography>
-                <Autocomplete
-                  options={patients}
-                  loading={loadingPatients}
-                  getOptionLabel={(option) =>
-                    `${option.firstName} ${option.lastName} (${option.patientNumber})`
-                  }
-                  onChange={(_, val) => void handlePatientChange(val)}
-                  value={selectedPatient}
-                  renderInput={(params) => (
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12 }}>
                     <TextField
-                      {...params}
-                      label="Select or Type Patient Name/Number"
-                      variant="outlined"
-                      slotProps={{
-                        input: {
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <SearchIcon color="action" />
-                            </InputAdornment>
-                          ),
-                          endAdornment: (
-                            <>
-                              {loadingPatients ? <CircularProgress color="inherit" size={20} /> : null}
-                              {params.slotProps?.input?.endAdornment}
-                            </>
-                          ),
-                        },
-                      }}
+                      label="Patient Name"
+                      value={patientNameInput}
+                      onChange={(e) => setPatientNameInput(e.target.value)}
+                      fullWidth
+                      helperText="First or last name"
                     />
-                  )}
-                />
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      label="Mobile Number"
+                      value={patientMobileInput}
+                      onChange={(e) => setPatientMobileInput(e.target.value)}
+                      fullWidth
+                      helperText="Patient phone number"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      onClick={handleSearchPatient}
+                      sx={{ height: 48 }}
+                    >
+                      Search Patient
+                    </Button>
+                  </Grid>
+                </Grid>
+
+                {patientSearchStatus === "SUCCESS" && selectedPatient && (
+                  <Alert severity="success" sx={{ borderRadius: 2 }}>
+                    ✓ Patient Selected: {selectedPatient.firstName} {selectedPatient.lastName}
+                  </Alert>
+                )}
+                {patientSearchStatus === "NOT_FOUND" && (
+                  <Alert severity="error" sx={{ borderRadius: 2 }}>
+                    ✗ No patient found matching these details. Please verify.
+                  </Alert>
+                )}
+                {patientSearchStatus === "MULTIPLE" && (
+                  <Alert severity="warning" sx={{ borderRadius: 2 }}>
+                    ⚠ Multiple matches found. Please refine name or mobile.
+                  </Alert>
+                )}
               </CardContent>
             </Card>
 
@@ -392,11 +476,12 @@ export default function Laboratory() {
 
                       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
                         <TextField
-                          label="Report Title (e.g. Blood Panel, Chest X-Ray)"
+                          label="Name of the Report *"
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
                           fullWidth
                           variant="outlined"
+                          required
                         />
 
                         <Paper
@@ -478,8 +563,9 @@ export default function Laboratory() {
             </AnimatePresence>
           </Box>
         </Grid>
+        )}
 
-        <Grid size={{ xs: 12, md: 7 }}>
+        <Grid size={{ xs: 12, md: isPatient ? 12 : 7 }}>
           <Card sx={{ borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.06)", height: "100%" }}>
             <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%" }}>
               <Box
