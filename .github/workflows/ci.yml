@@ -10,9 +10,13 @@ on:
       - main
       - frontendbranch
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
   backend:
-    name: Backend CI
+    name: Backend CI (Build & Test)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -37,7 +41,7 @@ jobs:
           ./gradlew test
 
   frontend:
-    name: Frontend CI
+    name: Frontend CI (Build)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -59,3 +63,70 @@ jobs:
         run: |
           cd frontend
           npm run build
+
+  publish-docker-images:
+    name: Build & Publish Docker Images
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/frontendbranch')
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
+
+      - name: Extract metadata for Frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+
+  deploy:
+    name: Deploy to Production Server
+    needs: publish-docker-images
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/frontendbranch')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Simulating SSH deploy: pulls compose file, updates image tags, and restarts container stack.
+      - name: Deploy via SSH (Simulation / Setup)
+        run: |
+          echo "Connecting to production server..."
+          echo "Pulling docker-compose.yml..."
+          echo "Updating S3, MySQL database and container images..."
+          echo "docker compose down && docker compose up -d"
+          echo "Deployment completed successfully!"
