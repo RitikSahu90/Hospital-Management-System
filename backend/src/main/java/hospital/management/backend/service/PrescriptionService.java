@@ -11,4 +11,7 @@ public interface PrescriptionService {
     void delete(Long id);
     PrescriptionResponse findById(Long id);
     List<PrescriptionResponse> findAll();
+    List<PrescriptionResponse> findAllForPatient(String patientUsername);
+    PrescriptionResponse uploadPdf(Long id, org.springframework.web.multipart.MultipartFile file);
+    String createDownloadUrl(Long id);
 }

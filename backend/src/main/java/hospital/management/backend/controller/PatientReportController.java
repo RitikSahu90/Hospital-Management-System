@@ -1,6 +1,5 @@
 package hospital.management.backend.controller;
 
-import hospital.management.backend.entity.PatientReport;
 import hospital.management.backend.dto.response.PatientReportResponse;
 import hospital.management.backend.service.PatientReportService;
 import hospital.management.backend.service.PatientService;
@@ -22,7 +21,7 @@ public class PatientReportController {
     private final PatientService patientService;
 
     @PostMapping(consumes = "multipart/form-data")
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT')")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT','PHARMACIST')")
     public ResponseEntity<PatientReportResponse> upload(@PathVariable Long patientId,
                                                 @RequestParam String title,
                                                 @RequestPart MultipartFile file,
@@ -32,17 +31,17 @@ public class PatientReportController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT')")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT','PHARMACIST')")
     public ResponseEntity<List<PatientReportResponse>> list(@PathVariable Long patientId, Authentication authentication) {
         ensureOwnership(patientId, authentication);
         return ResponseEntity.ok(reportService.findByPatient(patientId));
     }
 
     @GetMapping("/report/{reportId}/download")
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT')")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT','PHARMACIST')")
     public ResponseEntity<java.util.Map<String, String>> download(@PathVariable Long patientId, @PathVariable Long reportId, Authentication authentication) {
         ensureOwnership(patientId, authentication);
-        return ResponseEntity.ok(java.util.Map.of("url", reportService.createDownloadUrl(reportId)));
+        return ResponseEntity.ok(java.util.Map.of("url", reportService.createDownloadUrl(patientId, reportId)));
     }
 
     private void ensureOwnership(Long patientId, Authentication authentication) {

@@ -8,7 +8,6 @@ const ROUTE_TITLES: Record<string, string> = {
   "/patients": "Patients",
   "/doctors": "Doctors",
   "/departments": "Departments",
-  "/availability": "Doctor Availability",
   "/appointments": "Appointments",
   "/medical-records": "Medical Records",
   "/laboratory": "Laboratory",

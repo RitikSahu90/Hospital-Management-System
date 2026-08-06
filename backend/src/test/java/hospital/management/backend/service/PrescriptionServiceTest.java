@@ -34,6 +34,9 @@ class PrescriptionServiceTest {
     @Mock private MedicalRecordRepository medicalRecordRepository;
     @Mock private MedicineRepository medicineRepository;
     @Mock private PrescriptionMapper prescriptionMapper;
+    @Mock private software.amazon.awssdk.services.s3.S3Client s3Client;
+    @Mock private software.amazon.awssdk.services.s3.presigner.S3Presigner s3Presigner;
+    @Mock private hospital.management.backend.config.SecretsConfig secretsConfig;
     @InjectMocks private PrescriptionServiceImpl prescriptionService;
 
     @BeforeEach void setUp() { MockitoAnnotations.openMocks(this); }

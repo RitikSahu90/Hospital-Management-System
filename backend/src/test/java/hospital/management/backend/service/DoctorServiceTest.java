@@ -58,7 +58,7 @@ class DoctorServiceTest {
         request.setSpecialization("Neurology");
 
         Doctor entity = Doctor.builder().id(3L).firstName("Neha").lastName("Kumar").licenseNumber("LIC-1").specialization("Neurology").build();
-        DoctorResponse response = new DoctorResponse(3L, "Neha", "Kumar", "LIC-1", "Neurology", null, null);
+        DoctorResponse response = new DoctorResponse(3L, null, null, null, "Neha", "Kumar", "LIC-1", "Neurology", null, null, null, null);
 
         when(doctorMapper.toEntity(request)).thenReturn(entity);
         when(departmentRepository.findById(any())).thenReturn(Optional.of(new Department()));
@@ -84,7 +84,7 @@ class DoctorServiceTest {
         request.setConsultationFee(500.0);
 
         Doctor existing = Doctor.builder().id(3L).firstName("Old").lastName("Name").licenseNumber("LIC-1").specialization("Old").build();
-        DoctorResponse response = new DoctorResponse(3L, "Neha", "Kumar", "LIC-1", "Neurology", "9876543210", 500.0);
+        DoctorResponse response = new DoctorResponse(3L, null, null, null, "Neha", "Kumar", "LIC-1", "Neurology", "9876543210", null, 500.0, null);
 
         when(doctorRepository.findById(3L)).thenReturn(Optional.of(existing));
         when(departmentRepository.findById(any())).thenReturn(Optional.of(new Department()));
@@ -130,7 +130,7 @@ class DoctorServiceTest {
     void shouldFindDoctorById() {
         Doctor doctor = Doctor.builder().id(4L).firstName("Aman").lastName("Singh").specialization("Cardiology").build();
         when(doctorRepository.findById(4L)).thenReturn(Optional.of(doctor));
-        when(doctorMapper.toResponse(doctor)).thenReturn(new DoctorResponse(4L, "Aman", "Singh", null, "Cardiology", null, null));
+        when(doctorMapper.toResponse(doctor)).thenReturn(new DoctorResponse(4L, null, null, null, "Aman", "Singh", null, "Cardiology", null, null, null, null));
 
         DoctorResponse result = doctorService.findById(4L);
 
@@ -153,8 +153,8 @@ class DoctorServiceTest {
         Doctor doctor1 = Doctor.builder().id(1L).firstName("Aman").lastName("Singh").specialization("Cardiology").build();
         Doctor doctor2 = Doctor.builder().id(2L).firstName("Neha").lastName("Kumar").specialization("Neurology").build();
         when(doctorRepository.findAll()).thenReturn(List.of(doctor1, doctor2));
-        when(doctorMapper.toResponse(doctor1)).thenReturn(new DoctorResponse(1L, "Aman", "Singh", null, "Cardiology", null, null));
-        when(doctorMapper.toResponse(doctor2)).thenReturn(new DoctorResponse(2L, "Neha", "Kumar", null, "Neurology", null, null));
+        when(doctorMapper.toResponse(doctor1)).thenReturn(new DoctorResponse(1L, null, null, null, "Aman", "Singh", null, "Cardiology", null, null, null, null));
+        when(doctorMapper.toResponse(doctor2)).thenReturn(new DoctorResponse(2L, null, null, null, "Neha", "Kumar", null, "Neurology", null, null, null, null));
 
         List<DoctorResponse> result = doctorService.findAll();
 
@@ -176,7 +176,7 @@ class DoctorServiceTest {
     void shouldAddAndGetAvailability() {
         Doctor doctor = Doctor.builder().id(5L).firstName("Anita").lastName("Das").build();
         AvailabilityRequest request = new AvailabilityRequest();
-        request.setDayOfWeek(DayOfWeek.MONDAY);
+        request.setDayOfWeek(AvailabilityDay.MON);
         request.setStartTime(LocalTime.of(9, 0));
         request.setEndTime(LocalTime.of(12, 0));
 
@@ -184,7 +184,7 @@ class DoctorServiceTest {
         DoctorAvailability availability = new DoctorAvailability();
         availability.setId(11L);
         availability.setDoctor(doctor);
-        availability.setDayOfWeek(DayOfWeek.MONDAY);
+        availability.setDayOfWeek(AvailabilityDay.MON);
         availability.setStartTime(LocalTime.of(9, 0));
         availability.setEndTime(LocalTime.of(12, 0));
         when(availabilityRepository.save(any(DoctorAvailability.class))).thenReturn(availability);
@@ -202,7 +202,7 @@ class DoctorServiceTest {
     @Test
     void shouldThrowWhenAddingAvailabilityForNonExistentDoctor() {
         AvailabilityRequest request = new AvailabilityRequest();
-        request.setDayOfWeek(DayOfWeek.MONDAY);
+        request.setDayOfWeek(AvailabilityDay.MON);
         request.setStartTime(LocalTime.of(9, 0));
         request.setEndTime(LocalTime.of(12, 0));
 

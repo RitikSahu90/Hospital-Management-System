@@ -11,6 +11,7 @@ import hospital.management.backend.repository.PatientRepository;
 import hospital.management.backend.repository.AppointmentRepository;
 import hospital.management.backend.repository.PaymentRepository;
 import hospital.management.backend.service.BillingService;
+import hospital.management.backend.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +25,10 @@ import java.math.BigDecimal;
 public class BillingServiceImpl implements BillingService {
     private final BillingRepository billingRepository;
     private final PatientRepository patientRepository;
-        private final AppointmentRepository appointmentRepository;
-        private final PaymentRepository paymentRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final PaymentRepository paymentRepository;
     private final BillingMapper billingMapper;
+    private final NotificationService notificationService;
 
     @Override
     public BillingResponse create(BillingRequest request) {
@@ -38,6 +40,13 @@ public class BillingServiceImpl implements BillingService {
         billing.setAppointment(findAppointment(request.getAppointmentId()));
 
         Billing saved = billingRepository.save(billing);
+
+        // Save database notification for the patient
+        BigDecimal total = request.getConsultationFee().add(request.getMedicineCharges()).add(request.getOtherCharges());
+        String msg = String.format("A new bill has been generated for you (Invoice #%d). Total: ₹%,.2f. Details: Consultation Fee: ₹%,.2f, Medicines: ₹%,.2f.",
+                saved.getId(), total, request.getConsultationFee(), request.getMedicineCharges());
+        notificationService.createNotification(patient, "New Bill Generated", msg);
+
         return toResponse(saved);
     }
 
@@ -74,6 +83,16 @@ public class BillingServiceImpl implements BillingService {
     @Override
     public List<BillingResponse> findAll() {
                 return billingRepository.findAll().stream().map(this::toResponse).toList();
+    }
+
+    @Override
+    public List<BillingResponse> findAllForPatient(String patientUsername) {
+        Patient patient = patientRepository.findByUserUsername(patientUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Patient profile not found"));
+        return billingRepository.findAll().stream()
+                .filter(b -> b.getPatient() != null && b.getPatient().getId().equals(patient.getId()))
+                .map(this::toResponse)
+                .toList();
     }
 
         private Appointment findAppointment(Long id) {

@@ -20,6 +20,8 @@ import hospital.management.backend.repository.UserRepository;
 import hospital.management.backend.repository.DepartmentRepository;
 import hospital.management.backend.repository.AppointmentRepository;
 import hospital.management.backend.repository.MedicalRecordRepository;
+import hospital.management.backend.repository.PaymentRepository;
+import hospital.management.backend.repository.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,10 +48,16 @@ class PrescriptionControllerIntegrationTest {
     private PrescriptionRepository prescriptionRepository;
 
     @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
     private BillingRepository billingRepository;
 
     @Autowired
     private PatientRepository patientRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Autowired
     private DoctorRepository doctorRepository;
@@ -61,10 +69,15 @@ class PrescriptionControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        notificationRepository.deleteAll();
+        paymentRepository.deleteAll();
         billingRepository.deleteAll();
         prescriptionRepository.deleteAll();
+        medicalRecordRepository.deleteAll();
+        appointmentRepository.deleteAll();
         patientRepository.deleteAll();
         doctorRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test

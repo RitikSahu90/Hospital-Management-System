@@ -25,12 +25,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import hospital.management.backend.notification.service.NotificationService;
+
 class BillingServiceTest {
     @Mock private BillingRepository billingRepository;
     @Mock private PatientRepository patientRepository;
     @Mock private AppointmentRepository appointmentRepository;
     @Mock private PaymentRepository paymentRepository;
     @Mock private BillingMapper billingMapper;
+    @Mock private NotificationService notificationService;
     @InjectMocks private BillingServiceImpl billingService;
 
     @BeforeEach void setUp() { MockitoAnnotations.openMocks(this); }

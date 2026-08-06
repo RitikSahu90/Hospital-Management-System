@@ -136,4 +136,16 @@ class AuthServiceTest {
         verify(userRepository, never()).save(any(User.class));
         verify(jwtUtil, never()).generateToken(anyString());
     }
+
+    @Test
+    void shouldThrowWhenEmailAlreadyExists() {
+        when(userRepository.existsByUsername("newuser")).thenReturn(false);
+        when(userRepository.existsByEmail("new@example.com")).thenReturn(true);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> authService.register(registerRequest));
+
+        assertThat(exception.getMessage()).isEqualTo("Email address already exists");
+        verify(userRepository, never()).save(any(User.class));
+    }
 }

@@ -39,14 +39,17 @@ public class BillingController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','PHARMACIST')")
+    @PreAuthorize("hasAnyRole('ADMIN','PHARMACIST','PATIENT')")
     public ResponseEntity<BillingResponse> getBilling(@PathVariable Long id) {
         return ResponseEntity.ok(billingService.findById(id));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','PHARMACIST')")
-    public ResponseEntity<List<BillingResponse>> listBillings() {
+    @PreAuthorize("hasAnyRole('ADMIN','PHARMACIST','PATIENT')")
+    public ResponseEntity<List<BillingResponse>> listBillings(org.springframework.security.core.Authentication authentication) {
+        if (authentication != null && authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_PATIENT"))) {
+            return ResponseEntity.ok(billingService.findAllForPatient(authentication.getName()));
+        }
         return ResponseEntity.ok(billingService.findAll());
     }
 }

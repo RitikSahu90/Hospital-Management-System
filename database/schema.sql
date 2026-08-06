@@ -18,7 +18,7 @@ SOURCE schema/09_appointments.sql;
 -- Medical
 SOURCE schema/10_medical_records.sql;
 
--- Pharmacy (move here)
+-- Pharmacy
 SOURCE schema/13_suppliers.sql;
 SOURCE schema/14_medicines.sql;
 SOURCE schema/15_inventory.sql;
@@ -34,3 +34,17 @@ SOURCE schema/17_payments.sql;
 -- System
 SOURCE schema/18_notifications.sql;
 SOURCE schema/19_audit_logs.sql;
+
+-- ── Epic 1: Patient Lifecycle ──────────────────────────────────────
+SOURCE schema/20_opd_ipd.sql;
+SOURCE schema/21_emergency.sql;
+
+-- ── Epic 2: Clinical Management ───────────────────────────────────
+SOURCE schema/22_operation_theatres.sql;
+SOURCE schema/23_lab_radiology.sql;
+
+-- ── Epic 3: Financial / Insurance ─────────────────────────────────
+SOURCE schema/24_insurance.sql;
+
+-- ── Epic 5: Analytics & AI Risk Alerts ────────────────────────────
+SOURCE schema/25_risk_alerts.sql;

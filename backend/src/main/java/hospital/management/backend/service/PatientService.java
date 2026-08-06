@@ -12,6 +12,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PatientService {
     private final PatientRepository patientRepository;
+    private final hospital.management.backend.repository.DoctorRepository doctorRepository;
+    private final hospital.management.backend.repository.AppointmentRepository appointmentRepository;
+
+    public List<PatientResponse> findAllForDoctor(String doctorUsername) {
+        hospital.management.backend.entity.Doctor doctor = doctorRepository.findByUserUsername(doctorUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Doctor profile not found"));
+        
+        List<Long> patientIds = appointmentRepository.findAll().stream()
+                .filter(app -> app.getDoctor() != null && app.getDoctor().getId().equals(doctor.getId()))
+                .map(app -> app.getPatient())
+                .filter(java.util.Objects::nonNull)
+                .map(p -> p.getId())
+                .distinct()
+                .toList();
+
+        return patientRepository.findAllById(patientIds).stream()
+                .map(this::toResponse)
+                .toList();
+    }
 
     public List<PatientResponse> findAll() {
         return patientRepository.findAll().stream()
@@ -25,7 +44,8 @@ public class PatientService {
                         patient.getDateOfBirth(),
                         patient.getGender(),
                         patient.getAddress(),
-                        patient.getBloodGroup()))
+                        patient.getBloodGroup(),
+                        patient.getDiagnosis()))
                 .toList();
     }
 
@@ -58,6 +78,7 @@ public class PatientService {
         existing.setGender(patient.getGender());
         existing.setAddress(patient.getAddress());
         existing.setBloodGroup(patient.getBloodGroup());
+        existing.setDiagnosis(patient.getDiagnosis());
         return toResponse(patientRepository.save(existing));
     }
 
@@ -79,6 +100,7 @@ public class PatientService {
                 saved.getDateOfBirth(),
                 saved.getGender(),
                 saved.getAddress(),
-                saved.getBloodGroup());
+                saved.getBloodGroup(),
+                saved.getDiagnosis());
     }
 }

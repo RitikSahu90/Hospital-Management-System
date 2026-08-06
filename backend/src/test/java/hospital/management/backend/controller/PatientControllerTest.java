@@ -45,7 +45,7 @@ class PatientControllerTest {
     @WithMockUser
     void shouldCreatePatient() throws Exception {
         Patient patient = Patient.builder().id(1L).patientNumber("P-1").firstName("Asha").lastName("Patel").email("asha@example.com").phone("9876543210").dateOfBirth(java.time.LocalDate.of(1990, 1, 1)).gender(hospital.management.backend.enums.Gender.FEMALE).build();
-        when(patientService.create(org.mockito.ArgumentMatchers.any(Patient.class))).thenReturn(new hospital.management.backend.dto.response.PatientResponse(1L, "P-1", "Asha", "Patel", "asha@example.com", "9876543210", java.time.LocalDate.of(1990, 1, 1), hospital.management.backend.enums.Gender.FEMALE, null, null));
+        when(patientService.create(org.mockito.ArgumentMatchers.any(Patient.class))).thenReturn(new hospital.management.backend.dto.response.PatientResponse(1L, "P-1", "Asha", "Patel", "asha@example.com", "9876543210", java.time.LocalDate.of(1990, 1, 1), hospital.management.backend.enums.Gender.FEMALE, null, null, null));
 
         mockMvc.perform(post("/api/patients")
                         .contentType(MediaType.APPLICATION_JSON)

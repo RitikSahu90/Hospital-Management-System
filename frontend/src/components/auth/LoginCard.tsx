@@ -75,7 +75,7 @@ export default function LoginCard() {
                 color="text.secondary"
                 sx={{ mt: 1 }}
               >
-                Sign in to continue managing your hospital.
+                Sign in or create a patient account to access care information securely.
               </Typography>
             </Box>
 

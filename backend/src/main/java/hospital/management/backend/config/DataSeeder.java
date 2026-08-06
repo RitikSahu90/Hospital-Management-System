@@ -8,6 +8,7 @@ import hospital.management.backend.entity.Inventory;
 import hospital.management.backend.entity.Medicine;
 import hospital.management.backend.entity.Patient;
 import hospital.management.backend.entity.Payment;
+import hospital.management.backend.entity.MedicalRecord;
 import hospital.management.backend.entity.Role;
 import hospital.management.backend.entity.Supplier;
 import hospital.management.backend.entity.User;
@@ -25,6 +26,7 @@ import hospital.management.backend.repository.InventoryRepository;
 import hospital.management.backend.repository.MedicineRepository;
 import hospital.management.backend.repository.PatientRepository;
 import hospital.management.backend.repository.PaymentRepository;
+import hospital.management.backend.repository.MedicalRecordRepository;
 import hospital.management.backend.repository.RoleRepository;
 import hospital.management.backend.repository.SupplierRepository;
 import hospital.management.backend.repository.UserRepository;
@@ -53,6 +55,7 @@ public class DataSeeder implements CommandLineRunner {
     private final InventoryRepository inventoryRepository;
     private final BillingRepository billingRepository;
     private final PaymentRepository paymentRepository;
+    private final MedicalRecordRepository medicalRecordRepository;
 
     @Override
     public void run(String... args) {
@@ -72,6 +75,45 @@ public class DataSeeder implements CommandLineRunner {
                     .build());
         }
 
+        if (!userRepository.existsByUsername("doctor")) {
+            userRepository.save(User.builder()
+                    .username("doctor")
+                    .email("doctor@example.com")
+                    .password(passwordEncoder.encode("doctor123"))
+                    .role(doctorRole)
+                    .build());
+        }
+
+        if (!userRepository.existsByUsername("receptionist")) {
+            Role receptionistRole = roleRepository.findByName("RECEPTIONIST").orElseThrow();
+            userRepository.save(User.builder()
+                    .username("receptionist")
+                    .email("receptionist@example.com")
+                    .password(passwordEncoder.encode("receptionist123"))
+                    .role(receptionistRole)
+                    .build());
+        }
+
+        if (!userRepository.existsByUsername("pharmacist")) {
+            Role pharmacistRole = roleRepository.findByName("PHARMACIST").orElseThrow();
+            userRepository.save(User.builder()
+                    .username("pharmacist")
+                    .email("pharmacist@example.com")
+                    .password(passwordEncoder.encode("pharmacist123"))
+                    .role(pharmacistRole)
+                    .build());
+        }
+
+        if (!userRepository.existsByUsername("patient")) {
+            Role patientRole = roleRepository.findByName("PATIENT").orElseThrow();
+            userRepository.save(User.builder()
+                    .username("patient")
+                    .email("patient@example.com")
+                    .password(passwordEncoder.encode("patient123"))
+                    .role(patientRole)
+                    .build());
+        }
+
         if (patientRepository.count() == 0) {
             patientRepository.save(Patient.builder()
                     .patientNumber("P-0001")
@@ -83,6 +125,40 @@ public class DataSeeder implements CommandLineRunner {
                     .phone("9876543210")
                     .build());
         }
+
+        // Find Rohan Verma first, if not found in database, create him!
+        Patient rohan = patientRepository.findAll().stream()
+            .filter(p -> "Rohan".equalsIgnoreCase(p.getFirstName()) && "Verma".equalsIgnoreCase(p.getLastName()))
+            .findFirst()
+            .orElseGet(() -> {
+                long count = patientRepository.count() + 1;
+                return patientRepository.save(Patient.builder()
+                    .patientNumber("P-000" + count)
+                    .firstName("Rohan")
+                    .lastName("Verma")
+                    .dateOfBirth(LocalDate.of(2001, 7, 19))
+                    .gender(Gender.MALE)
+                    .email("rohan.verma@mail.com")
+                    .phone("9855555555")
+                    .address("78 Salt Lake, Kolkata")
+                    .bloodGroup("B-")
+                    .build());
+            });
+
+        // Link Rohan Verma patient record to "patient" user account and unlink other users
+        userRepository.findByUsername("patient").ifPresent(u -> {
+            patientRepository.findAll().stream()
+                .filter(p -> p.getUser() != null && p.getUser().getId().equals(u.getId()) && !p.getId().equals(rohan.getId()))
+                .forEach(p -> {
+                    p.setUser(null);
+                    patientRepository.save(p);
+                });
+
+            if (rohan.getUser() == null || !rohan.getUser().getId().equals(u.getId())) {
+                rohan.setUser(u);
+                patientRepository.save(rohan);
+            }
+        });
 
                 Department department = departmentRepository.findAll().stream().findFirst().orElseGet(() -> departmentRepository.save(Department.builder()
                     .name("Cardiology").code("CARD").description("Cardiology department").status(DepartmentStatus.ACTIVE).build()));
@@ -325,6 +401,20 @@ public class DataSeeder implements CommandLineRunner {
                         .consultationFee(new BigDecimal("1200.00")).medicineCharges(new BigDecimal("400.00"))
                         .otherCharges(new BigDecimal("150.00")).status(BillingStatus.PARTIALLY_PAID).build());
             }
+        }
+
+        // ── Medical Records ──
+        if (medicalRecordRepository.count() == 0) {
+            List<Appointment> appointments = appointmentRepository.findAll();
+            appointments.stream()
+                    .filter(app -> app.getStatus() == AppointmentStatus.COMPLETED)
+                    .forEach(app -> {
+                        medicalRecordRepository.save(MedicalRecord.builder()
+                                .appointment(app)
+                                .diagnosis("General diagnosis and checkup for " + app.getReason())
+                                .clinicalNotes("Patient responded well. Recommended follow-up in two weeks.")
+                                .build());
+                    });
         }
     }
 }

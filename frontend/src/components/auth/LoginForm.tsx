@@ -20,12 +20,15 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 import CustomTextField from "../common/CustomTextField";
 import PrimaryButton from "../common/PrimaryButton";
-import { login as loginRequest } from "../../services/authService";
+import { login as loginRequest, register as registerRequest } from "../../services/authService";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function LoginForm() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,14 +38,25 @@ export default function LoginForm() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError("");
+    if (isRegistering && password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
     setLoading(true);
 
     try {
-      const response = await loginRequest({ username, password });
-      login(response.token, response.username, response.role || "PATIENT");
-      navigate("/dashboard");
+      const response = isRegistering
+        ? await registerRequest({ username, email, password })
+        : await loginRequest({ username, password });
+      const role = response.role || "PATIENT";
+      login(response.token, response.username, role);
+      if (role === "PHARMACIST") {
+        navigate("/prescriptions");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
-      setError("Invalid username or password.");
+      setError(isRegistering ? "Unable to create your account. The username or email may already be in use." : "Invalid username or password.");
     } finally {
       setLoading(false);
     }
@@ -57,11 +71,21 @@ export default function LoginForm() {
       ) : null}
 
       <CustomTextField
-        label="Username"
+        label={isRegistering ? "Choose a username" : "Username"}
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         startIcon={<EmailOutlinedIcon color="action" />}
       />
+
+      {isRegistering && (
+        <CustomTextField
+          label="Email address"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          startIcon={<EmailOutlinedIcon color="action" />}
+        />
+      )}
 
       <CustomTextField
         label="Password"
@@ -79,7 +103,17 @@ export default function LoginForm() {
         }
       />
 
-      <Box
+      {isRegistering && (
+        <CustomTextField
+          label="Confirm password"
+          type={showPassword ? "text" : "password"}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          startIcon={<LockOutlinedIcon color="action" />}
+        />
+      )}
+
+      {!isRegistering && <Box
         sx={{
           mt: 2,
           display: "flex",
@@ -102,15 +136,22 @@ export default function LoginForm() {
         >
           Forgot Password?
         </Link>
-      </Box>
+      </Box>}
 
       <Box sx={{ mt: 3 }}>
         <PrimaryButton type="submit" disabled={loading}>
-          {loading ? "Signing In..." : "SIGN IN"}
+          {loading ? (isRegistering ? "Creating account..." : "Signing in...") : (isRegistering ? "CREATE ACCOUNT" : "SIGN IN")}
         </PrimaryButton>
       </Box>
 
-      <Paper
+      <Typography align="center" variant="body2" sx={{ mt: 2 }}>
+        {isRegistering ? "Already have an account? " : "New patient? "}
+        <Link component="button" type="button" underline="hover" onClick={() => { setIsRegistering((value) => !value); setError(""); }} sx={{ fontWeight: 700 }}>
+          {isRegistering ? "Sign in" : "Create an account"}
+        </Link>
+      </Typography>
+
+      {!isRegistering && <Paper
         sx={{
           mt: 3,
           p: 2,
@@ -124,24 +165,67 @@ export default function LoginForm() {
           Demo Credentials
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          <Chip
-            label="admin / admin123"
-            size="small"
-            color="primary"
-            variant="outlined"
-            onClick={() => { setUsername("admin"); setPassword("admin123"); }}
-            sx={{ cursor: "pointer" }}
-          />
-          <Chip
-            label="doctor / doctor123"
-            size="small"
-            color="secondary"
-            variant="outlined"
-            onClick={() => { setUsername("doctor"); setPassword("doctor123"); }}
-            sx={{ cursor: "pointer" }}
-          />
+        <Chip
+          label="admin / admin123"
+          size="small"
+          color="primary"
+          variant="outlined"
+          onClick={() => {
+            setUsername("admin");
+            setPassword("admin123");
+          }}
+          sx={{ cursor: "pointer" }}
+        />
+
+        <Chip
+          label="doctor / doctor123"
+          size="small"
+          color="secondary"
+          variant="outlined"
+          onClick={() => {
+            setUsername("doctor");
+            setPassword("doctor123");
+          }}
+          sx={{ cursor: "pointer" }}
+        />
+
+        <Chip
+          label="receptionist / receptionist123"
+          size="small"
+          color="success"
+          variant="outlined"
+          onClick={() => {
+            setUsername("receptionist");
+            setPassword("receptionist123");
+          }}
+          sx={{ cursor: "pointer" }}
+        />
+
+        <Chip
+          label="pharmacist / pharmacist123"
+          size="small"
+          color="warning"
+          variant="outlined"
+          onClick={() => {
+            setUsername("pharmacist");
+            setPassword("pharmacist123");
+          }}
+          sx={{ cursor: "pointer" }}
+        />
+
+        <Chip
+          label="patient / patient123"
+          size="small"
+          color="info"
+          variant="outlined"
+          onClick={() => {
+            setUsername("patient");
+            setPassword("patient123");
+          }}
+          sx={{ cursor: "pointer" }}
+        />
         </Box>
-      </Paper>
+      </Paper>}
     </form>
   );
 }

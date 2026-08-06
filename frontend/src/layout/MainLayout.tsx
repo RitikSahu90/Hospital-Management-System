@@ -14,6 +14,7 @@ export default function MainLayout() {
           flexGrow: 1,
           display: "flex",
           flexDirection: "column",
+          minWidth: 0,
         }}
       >
         <Topbar />
@@ -22,6 +23,8 @@ export default function MainLayout() {
           sx={{
             p: 3,
             flexGrow: 1,
+            minWidth: 0,
+            overflow: "auto",
           }}
         >
           <Outlet />

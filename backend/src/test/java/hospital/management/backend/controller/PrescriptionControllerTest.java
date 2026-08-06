@@ -39,7 +39,7 @@ class PrescriptionControllerTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void shouldCreatePrescription() throws Exception {
-        PrescriptionResponse response = new PrescriptionResponse(1L, 1L, 2L, 4L, List.of(), "Take with food");
+        PrescriptionResponse response = new PrescriptionResponse(1L, 1L, 2L, 4L, List.of(), "Take with food", null);
         Mockito.when(prescriptionService.create(Mockito.any(PrescriptionRequest.class))).thenReturn(response);
 
         String json = "{\"patientId\":1,\"doctorId\":2,\"medicalRecordId\":4,\"items\":[],\"notes\":\"Take with food\"}";

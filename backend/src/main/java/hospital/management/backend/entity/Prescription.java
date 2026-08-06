@@ -40,6 +40,9 @@ public class Prescription {
 
     private String notes;
 
+    @Column(name = "pdf_url")
+    private String pdfUrl;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
     @Column(name = "updated_at", nullable = false)

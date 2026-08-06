@@ -10,9 +10,16 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class MedicineResponse {
     private Long id;
+    private Long supplierId;
     private String name;
     private String manufacturer;
     private BigDecimal unitPrice;
     private Integer stockQuantity;
+    private Integer reorderLevel;
     private LocalDate expiryDate;
+
+    public MedicineResponse(Long id, String name, String manufacturer, BigDecimal unitPrice,
+                            Integer stockQuantity, LocalDate expiryDate) {
+        this(id, null, name, manufacturer, unitPrice, stockQuantity, null, expiryDate);
+    }
 }

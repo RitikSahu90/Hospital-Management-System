@@ -30,6 +30,7 @@ public class Department {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private DepartmentStatus status = DepartmentStatus.ACTIVE;
 
     @Column(name = "created_at", nullable = false, updatable = false)

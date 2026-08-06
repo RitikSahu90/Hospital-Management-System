@@ -3,6 +3,11 @@ package hospital.management.backend.controller;
 import hospital.management.backend.entity.Patient;
 import hospital.management.backend.repository.BillingRepository;
 import hospital.management.backend.repository.PatientRepository;
+import hospital.management.backend.repository.PaymentRepository;
+import hospital.management.backend.repository.PrescriptionRepository;
+import hospital.management.backend.repository.MedicalRecordRepository;
+import hospital.management.backend.repository.AppointmentRepository;
+import hospital.management.backend.repository.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +31,34 @@ class BillingControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
     private BillingRepository billingRepository;
+
+    @Autowired
+    private PrescriptionRepository prescriptionRepository;
+
+    @Autowired
+    private MedicalRecordRepository medicalRecordRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
     @Autowired
     private PatientRepository patientRepository;
 
+    @Autowired
+    private NotificationRepository notificationRepository;
+
     @BeforeEach
     void setUp() {
+        notificationRepository.deleteAll();
+        paymentRepository.deleteAll();
         billingRepository.deleteAll();
+        prescriptionRepository.deleteAll();
+        medicalRecordRepository.deleteAll();
+        appointmentRepository.deleteAll();
         patientRepository.deleteAll();
     }
 

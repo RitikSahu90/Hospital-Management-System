@@ -16,5 +16,7 @@ public class DashboardController {
 
     @GetMapping("/summary")
     @PreAuthorize("isAuthenticated()")
-    public DashboardResponse summary() { return dashboardService.getSummary(); }
+    public DashboardResponse summary(org.springframework.security.core.Authentication authentication) {
+        return dashboardService.getSummary(authentication);
+    }
 }

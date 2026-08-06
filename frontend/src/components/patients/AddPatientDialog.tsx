@@ -27,7 +27,7 @@ const emptyPatient: PatientCreateRequest = {
   gender: "OTHER",
   address: "",
   bloodGroup: "",
-  diagnosis: "",
+  diagnosis: "Pending",
 };
 
 export default function AddPatientDialog({
@@ -79,7 +79,21 @@ export default function AddPatientDialog({
           <Grid size={{ xs: 12 }}><TextField fullWidth label="Address" name="address" value={patient.address} onChange={handleChange} /></Grid>
 
           <Grid size={{ xs: 12 }}>
-            <TextField fullWidth label="Diagnosis" name="diagnosis" value={patient.diagnosis} onChange={handleChange} />
+            <TextField
+              fullWidth
+              select
+              label="Diagnosis"
+              name="diagnosis"
+              value={patient.diagnosis}
+              onChange={handleChange}
+              slotProps={{ select: { native: true } }}
+            >
+              <option value="Pending">Pending</option>
+              <option value="Ongoing">Ongoing</option>
+              <option value="Completed">Completed</option>
+              <option value="Discharged">Discharged</option>
+              <option value="Cancelled">Cancelled</option>
+            </TextField>
           </Grid>
         </Grid>
       </DialogContent>

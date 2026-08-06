@@ -27,10 +27,6 @@ public class AvailabilityRequest {
         this.dayOfWeek = dayOfWeek;
     }
 
-    public void setDayOfWeek(DayOfWeek dayOfWeek) {
-        this.dayOfWeek = AvailabilityDay.valueOf(dayOfWeek.name().substring(0, 3));
-    }
-
     public LocalTime getStartTime() {
         return startTime;
     }

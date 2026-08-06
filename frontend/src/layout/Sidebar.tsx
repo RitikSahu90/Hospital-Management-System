@@ -28,6 +28,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DescriptionIcon from "@mui/icons-material/Description";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import { useAuth } from "../contexts/AuthContext";
 import type { UserRole } from "../types/auth";
@@ -51,27 +52,27 @@ const menuSections: MenuSection[] = [
   {
     label: "Overview",
     items: [
-      { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
+      { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST", "PATIENT"] },
+      { text: "Profile", path: "/profile", icon: <AccountCircleIcon /> },
     ],
   },
   {
     label: "Clinical",
     items: [
-      { text: "Patients", path: "/patients", icon: <PeopleIcon /> },
-      { text: "Doctors", path: "/doctors", icon: <LocalHospitalIcon /> },
+      { text: "Patients", path: "/patients", icon: <PeopleIcon />, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST"] },
+      { text: "Doctors", path: "/doctors", icon: <LocalHospitalIcon />, roles: ["ADMIN", "RECEPTIONIST", "PHARMACIST", "PATIENT"] },
       { text: "Departments", path: "/departments", icon: <LocalHospitalIcon /> },
-      { text: "Availability", path: "/availability", icon: <EventNoteIcon /> },
-      { text: "Appointments", path: "/appointments", icon: <EventNoteIcon /> },
-      { text: "Medical Records", path: "/medical-records", icon: <DescriptionIcon /> },
-      { text: "Laboratory", path: "/laboratory", icon: <ScienceIcon /> },
-      { text: "Prescriptions", path: "/prescriptions", icon: <MedicationIcon /> },
+      { text: "Appointments", path: "/appointments", icon: <EventNoteIcon />, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST", "PATIENT"] },
+      { text: "Medical Records", path: "/medical-records", icon: <DescriptionIcon />, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST"] },
+      { text: "Laboratory", path: "/laboratory", icon: <ScienceIcon />, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST", "PHARMACIST", "PATIENT"] },
+      { text: "Prescriptions", path: "/prescriptions", icon: <MedicationIcon />, roles: ["ADMIN", "DOCTOR", "PHARMACIST", "PATIENT"] },
     ],
   },
   {
     label: "Financial",
     items: [
-      { text: "Billing", path: "/billing", icon: <ReceiptLongIcon />, roles: ["ADMIN", "RECEPTIONIST"] },
-      { text: "Payments", path: "/payments", icon: <ReceiptLongIcon />, roles: ["ADMIN", "RECEPTIONIST"] },
+      { text: "Billing", path: "/billing", icon: <ReceiptLongIcon />, roles: ["ADMIN", "PHARMACIST", "PATIENT"] },
+      { text: "Payments", path: "/payments", icon: <ReceiptLongIcon />, roles: ["ADMIN", "PHARMACIST"] },
     ],
   },
   {
@@ -94,7 +95,17 @@ export default function Sidebar() {
   const filteredSections = menuSections
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => !item.roles || item.roles.includes(userRole)),
+      items: section.items
+        .filter((item) => !item.roles || item.roles.includes(userRole))
+        .map((item) => {
+          if (item.path === "/laboratory" && (userRole === "PHARMACIST" || userRole === "PATIENT")) {
+            return { ...item, text: "Reports" };
+          }
+          if (item.path === "/billing" && userRole === "PATIENT") {
+            return { ...item, text: "My Bills" };
+          }
+          return item;
+        }),
     }))
     .filter((section) => section.items.length > 0);
 

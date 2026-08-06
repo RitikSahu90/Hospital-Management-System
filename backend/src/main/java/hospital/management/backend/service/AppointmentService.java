@@ -12,4 +12,6 @@ public interface AppointmentService {
     AppointmentResponse updateStatus(Long id, AppointmentStatusUpdateRequest request);
     AppointmentResponse findById(Long id);
     List<AppointmentResponse> findAll();
+    List<AppointmentResponse> findAllForDoctor(String doctorUsername);
+    List<AppointmentResponse> findAllForPatient(String patientUsername);
 }

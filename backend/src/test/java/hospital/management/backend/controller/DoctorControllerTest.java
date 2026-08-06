@@ -50,7 +50,7 @@ class DoctorControllerTest {
         request.setSpecialization("Cardiology");
 
         when(doctorService.create(org.mockito.ArgumentMatchers.any(DoctorRequest.class)))
-                .thenReturn(new DoctorResponse(1L, "Ravi", "Sharma", "LIC-9", "Cardiology", null, null));
+                .thenReturn(new DoctorResponse(1L, 1L, 2L, "DOC-9", "Ravi", "Sharma", "LIC-9", "Cardiology", null, 1, null, null));
 
         mockMvc.perform(post("/api/doctors")
                         .contentType(MediaType.APPLICATION_JSON)

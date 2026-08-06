@@ -23,7 +23,12 @@ public class MedicalRecordController {
     public ResponseEntity<MedicalRecordResponse> create(@Valid @RequestBody MedicalRecordRequest request) { MedicalRecordResponse response = service.create(request); return ResponseEntity.created(URI.create("/api/medical-records/" + response.getId())).body(response); }
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT')")
-    public List<MedicalRecordResponse> list() { return service.findAll(); }
+    public List<MedicalRecordResponse> list(org.springframework.security.core.Authentication authentication) {
+        if (authentication != null && authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_DOCTOR"))) {
+            return service.findAllForDoctor(authentication.getName());
+        }
+        return service.findAll();
+    }
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT')")
     public MedicalRecordResponse get(@PathVariable Long id) { return service.findById(id); }

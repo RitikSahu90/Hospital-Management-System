@@ -16,4 +16,5 @@ public class PatientResponse {
     private hospital.management.backend.enums.Gender gender;
     private String address;
     private String bloodGroup;
+    private String diagnosis;
 }
