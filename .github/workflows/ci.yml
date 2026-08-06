@@ -140,13 +140,32 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            # Install Docker if not present
+            if ! command -v docker &> /dev/null; then
+              echo "Docker not found. Installing Docker..."
+              sudo apt-get update -y
+              sudo apt-get install -y docker.io
+              sudo systemctl start docker
+              sudo systemctl enable docker
+            fi
+            
+            # Install Docker Compose if not present
+            if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+              echo "Docker Compose not found. Installing docker-compose-plugin..."
+              sudo apt-get install -y docker-compose-plugin
+            fi
+
             mkdir -p ~/app
             cd ~/app
-            # Log in to GitHub Container Registry on remote server
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Log in to GitHub Container Registry
+            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
             # Pull latest built container images
-            docker compose pull
+            sudo docker compose pull
+            
             # Restart services
-            docker compose up -d
+            sudo docker compose up -d
+            
             # Remove old dangling container images
-            docker image prune -f
+            sudo docker image prune -f
