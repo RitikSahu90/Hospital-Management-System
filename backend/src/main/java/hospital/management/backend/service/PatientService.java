@@ -62,6 +62,26 @@ public class PatientService {
     }
 
     public PatientResponse create(Patient patient) {
+        if (patient.getPatientNumber() == null || patient.getPatientNumber().isBlank()) {
+            long count = patientRepository.count() + 1;
+            String generated = String.format("P-%04d", count);
+            while (patientRepository.findByPatientNumber(generated).isPresent()) {
+                count++;
+                generated = String.format("P-%04d", count);
+            }
+            patient.setPatientNumber(generated);
+        } else {
+            String provided = patient.getPatientNumber();
+            if (patientRepository.findByPatientNumber(provided).isPresent()) {
+                long count = patientRepository.count() + 1;
+                String generated = String.format("P-%04d", count);
+                while (patientRepository.findByPatientNumber(generated).isPresent()) {
+                    count++;
+                    generated = String.format("P-%04d", count);
+                }
+                patient.setPatientNumber(generated);
+            }
+        }
         Patient saved = patientRepository.save(patient);
         return toResponse(saved);
     }

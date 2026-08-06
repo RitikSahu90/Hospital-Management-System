@@ -3,3 +3,9 @@ build
 .git
 .gitignore
 .env
+backenddb.mv.db
+backenddb.trace.db
+*.mv.db
+*.trace.db
+.gradle
+build

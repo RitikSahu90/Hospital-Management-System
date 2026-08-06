@@ -56,7 +56,7 @@ export default function AddPatientDialog({
 
       <DialogContent>
         <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth label="Patient Number" name="patientNumber" value={patient.patientNumber} onChange={handleChange} required /></Grid>
+          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth label="Patient Number (Optional)" name="patientNumber" value={patient.patientNumber} onChange={handleChange} /></Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <TextField fullWidth label="First Name" name="firstName" value={patient.firstName} onChange={handleChange} />
           </Grid>
