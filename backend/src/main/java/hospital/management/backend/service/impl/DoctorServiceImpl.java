@@ -12,6 +12,10 @@ import hospital.management.backend.repository.DoctorAvailabilityRepository;
 import hospital.management.backend.repository.DoctorRepository;
 import hospital.management.backend.repository.DepartmentRepository;
 import hospital.management.backend.repository.UserRepository;
+import hospital.management.backend.repository.RoleRepository;
+import hospital.management.backend.entity.Role;
+import hospital.management.backend.entity.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import hospital.management.backend.service.DoctorService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,13 +30,17 @@ public class DoctorServiceImpl implements DoctorService {
     private final DoctorAvailabilityRepository availabilityRepository;
     private final DepartmentRepository departmentRepository;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
     private final DoctorMapper mapper;
 
-    public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorAvailabilityRepository availabilityRepository, DepartmentRepository departmentRepository, UserRepository userRepository, DoctorMapper mapper) {
+    public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorAvailabilityRepository availabilityRepository, DepartmentRepository departmentRepository, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, DoctorMapper mapper) {
         this.doctorRepository = doctorRepository;
         this.availabilityRepository = availabilityRepository;
         this.departmentRepository = departmentRepository;
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
         this.mapper = mapper;
     }
 
@@ -41,8 +49,23 @@ public class DoctorServiceImpl implements DoctorService {
         Doctor d = mapper.toEntity(request);
         d.setDepartment(departmentRepository.findById(request.getDepartmentId())
             .orElseThrow(() -> new IllegalArgumentException("Department not found")));
-        d.setUser(userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("User not found")));
+        
+        if (request.getUserId() != null) {
+            d.setUser(userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found")));
+        } else {
+            Role role = roleRepository.findByName("DOCTOR")
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            User user = User.builder()
+                    .username((request.getFirstName() + request.getLastName()).toLowerCase().replaceAll("\\s+", "") + System.currentTimeMillis() % 1000)
+                    .email(request.getFirstName().toLowerCase() + "." + request.getLastName().toLowerCase() + "@hospital.com")
+                    .password(passwordEncoder.encode("pass123"))
+                    .role(role)
+                    .build();
+            userRepository.save(user);
+            d.setUser(user);
+        }
+        
         Doctor saved = doctorRepository.save(d);
         return mapper.toResponse(saved);
     }
@@ -61,8 +84,11 @@ public class DoctorServiceImpl implements DoctorService {
         existing.setStatus(request.getStatus());
         existing.setDepartment(departmentRepository.findById(request.getDepartmentId())
             .orElseThrow(() -> new IllegalArgumentException("Department not found")));
-        existing.setUser(userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("User not found")));
+            
+        if (request.getUserId() != null) {
+            existing.setUser(userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found")));
+        }
         Doctor saved = doctorRepository.save(existing);
         return mapper.toResponse(saved);
     }

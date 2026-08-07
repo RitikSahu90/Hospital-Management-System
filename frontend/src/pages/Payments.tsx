@@ -4,6 +4,7 @@ import { Alert, Box, Button, Paper, TextField, Typography, Chip, Grid, Divider }
 import { createPayment, getPayments } from "../services/paymentService";
 import type { Payment, PaymentMethod } from "../services/paymentService";
 import { getBilling } from "../services/billingService";
+import { getPatients } from "../services/patientService";
 import type { Billing } from "../types/clinical";
 
 export default function Payments() {
@@ -15,6 +16,7 @@ export default function Payments() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [patients, setPatients] = useState<any[]>([]);
 
   const load = async (forcedId?: number) => {
     try {
@@ -40,6 +42,7 @@ export default function Payments() {
   };
 
   useEffect(() => {
+    getPatients().then(setPatients).catch(console.error);
     const qId = searchParams.get("billId");
     if (qId) {
       setBillId(qId);
@@ -114,8 +117,13 @@ export default function Payments() {
             </Box>
             <Grid container spacing={2}>
               <Grid size={{ xs: 6 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Patient ID</Typography>
-                <Typography variant="body1" sx={{ fontWeight: 600 }}>#{bill.patientId}</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Patient</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                  {(() => {
+                    const p = patients.find(pat => pat.id === bill.patientId);
+                    return p ? `${p.firstName} ${p.lastName} (#${p.id})` : `#${bill.patientId}`;
+                  })()}
+                </Typography>
               </Grid>
               <Grid size={{ xs: 6 }}>
                 <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Total Amount</Typography>

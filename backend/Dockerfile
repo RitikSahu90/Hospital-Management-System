@@ -1,8 +1,12 @@
 # Stage 1: Build
-FROM gradle:8.7-jdk17 AS build
+FROM eclipse-temurin:17-jdk-alpine AS build
 WORKDIR /app
-COPY --chown=gradle:gradle . .
-RUN gradle build -x test --no-daemon
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle settings.gradle ./
+RUN ./gradlew dependencies --no-daemon || true
+COPY src src
+RUN ./gradlew bootJar --no-daemon
 
 # Stage 2: Runtime
 FROM eclipse-temurin:17-jre-alpine

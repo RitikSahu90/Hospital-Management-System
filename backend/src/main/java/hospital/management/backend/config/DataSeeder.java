@@ -114,7 +114,55 @@ public class DataSeeder implements CommandLineRunner {
                     .build());
         }
 
-        if (patientRepository.count() == 0) {
+        // ── Generate 5 dummy users for each role ──
+        String[] roles = {"ADMIN", "DOCTOR", "RECEPTIONIST", "PHARMACIST", "PATIENT"};
+        for (String roleName : roles) {
+            Role role = roleRepository.findByName(roleName).orElse(null);
+            if (role != null) {
+                for (int i = 1; i <= 5; i++) {
+                    String un = roleName.toLowerCase() + i;
+                    if (!userRepository.existsByUsername(un)) {
+                        User user = userRepository.save(User.builder()
+                                .username(un)
+                                .email(un + "@example.com")
+                                .password(passwordEncoder.encode("pass123"))
+                                .role(role)
+                                .build());
+                        
+                        if ("PATIENT".equals(roleName)) {
+                            patientRepository.save(Patient.builder()
+                                .user(user)
+                                .patientNumber("DUMMY-" + i)
+                                .firstName("DummyPat")
+                                .lastName(String.valueOf(i))
+                                .dateOfBirth(LocalDate.of(1990, 1, 1))
+                                .gender(Gender.MALE)
+                                .email(un + "@example.com")
+                                .phone("111111111" + i)
+                                .build());
+                        } else if ("DOCTOR".equals(roleName)) {
+                            Department dept = departmentRepository.findAll().stream().findFirst().orElseGet(() -> departmentRepository.save(Department.builder()
+                                .name("Cardiology").code("CARD").description("Cardiology department").status(DepartmentStatus.ACTIVE).build()));
+                            doctorRepository.save(Doctor.builder()
+                                .user(user)
+                                .department(dept)
+                                .doctorCode("DUMMYDOC-" + i)
+                                .firstName("DummyDoc")
+                                .lastName(String.valueOf(i))
+                                .licenseNumber("LIC-DUMMY-" + i)
+                                .specialization("General")
+                                .phone("222222222" + i)
+                                .yearsExperience(5)
+                                .status(DoctorStatus.ACTIVE)
+                                .consultationFee(500.0)
+                                .build());
+                        }
+                    }
+                }
+            }
+        }
+
+        if (patientRepository.count() <= 5) {
             patientRepository.save(Patient.builder()
                     .patientNumber("P-0001")
                     .firstName("Asha")
@@ -131,9 +179,8 @@ public class DataSeeder implements CommandLineRunner {
             .filter(p -> "Rohan".equalsIgnoreCase(p.getFirstName()) && "Verma".equalsIgnoreCase(p.getLastName()))
             .findFirst()
             .orElseGet(() -> {
-                long count = patientRepository.count() + 1;
                 return patientRepository.save(Patient.builder()
-                    .patientNumber("P-000" + count)
+                    .patientNumber("P-0002")
                     .firstName("Rohan")
                     .lastName("Verma")
                     .dateOfBirth(LocalDate.of(2001, 7, 19))
@@ -145,15 +192,8 @@ public class DataSeeder implements CommandLineRunner {
                     .build());
             });
 
-        // Link Rohan Verma patient record to "patient" user account and unlink other users
+        // Link Rohan Verma patient record to "patient" user account
         userRepository.findByUsername("patient").ifPresent(u -> {
-            patientRepository.findAll().stream()
-                .filter(p -> p.getUser() != null && p.getUser().getId().equals(u.getId()) && !p.getId().equals(rohan.getId()))
-                .forEach(p -> {
-                    p.setUser(null);
-                    patientRepository.save(p);
-                });
-
             if (rohan.getUser() == null || !rohan.getUser().getId().equals(u.getId())) {
                 rohan.setUser(u);
                 patientRepository.save(rohan);
@@ -213,12 +253,8 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         // ── Extra patients ──
-        if (patientRepository.count() <= 1) {
+        if (patientRepository.count() <= 7) {
             patientRepository.saveAll(List.of(
-                    Patient.builder().patientNumber("P-0002").firstName("Rohan").lastName("Verma")
-                            .dateOfBirth(LocalDate.of(2001, 7, 19)).gender(Gender.MALE)
-                            .email("rohan.verma@mail.com").phone("9855555555")
-                            .address("78 Salt Lake, Kolkata").bloodGroup("B-").build(),
                     Patient.builder().patientNumber("P-0003").firstName("Priya").lastName("Nair")
                             .dateOfBirth(LocalDate.of(1985, 11, 2)).gender(Gender.FEMALE)
                             .email("priya.nair@mail.com").phone("9833333333")

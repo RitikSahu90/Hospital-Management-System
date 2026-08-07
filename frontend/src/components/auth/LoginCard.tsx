@@ -81,6 +81,19 @@ export default function LoginCard() {
 
             <LoginForm />
 
+            <Box sx={{ mt: 3, p: 2, bgcolor: "rgba(21, 101, 192, 0.04)", borderRadius: 2, border: "1px dashed rgba(21, 101, 192, 0.2)" }}>
+              <Typography variant="subtitle2" color="primary" sx={{ mb: 1, fontWeight: "bold" }}>
+                Demo Credentials (Password: pass123)
+              </Typography>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
+                <Typography variant="body2" color="text.secondary"><b>Admin:</b> admin1</Typography>
+                <Typography variant="body2" color="text.secondary"><b>Doctor:</b> doctor1</Typography>
+                <Typography variant="body2" color="text.secondary"><b>Receptionist:</b> receptionist1</Typography>
+                <Typography variant="body2" color="text.secondary"><b>Pharmacist:</b> pharmacist1</Typography>
+                <Typography variant="body2" color="text.secondary"><b>Patient:</b> patient1</Typography>
+              </Box>
+            </Box>
+
             <Divider sx={{ my: 4 }} />
 
             <Typography

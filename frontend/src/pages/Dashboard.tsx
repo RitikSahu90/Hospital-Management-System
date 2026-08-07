@@ -13,6 +13,7 @@ import {
   ListItemAvatar,
   ListItemText,
   Divider,
+  Button,
 } from "@mui/material";
 import {
   People as PeopleIcon,
@@ -39,6 +40,9 @@ import type { DashboardSummary } from "../services/dashboardService";
 import { useAuth } from "../contexts/AuthContext";
 import { getPatientNotifications } from "../services/notificationService";
 import type { NotificationResponse } from "../services/notificationService";
+import { getPatientDocuments } from "../services/documentService";
+import type { DocumentMetadataResponse } from "../services/documentService";
+import { Download as DownloadIcon } from "@mui/icons-material";
 
 const STATUS_COLORS: Record<string, string> = {
   SCHEDULED: "#1565C0",
@@ -56,6 +60,8 @@ const METRIC_ICONS: Record<string, React.ReactNode> = {
   "Number of Trusted Patients": <PeopleIcon />,
   "Recovery Rating of Facilities": <DoctorIcon />,
   "My Scheduled Appointments": <AppointmentIcon />,
+  "My Patients": <PeopleIcon />,
+  "My Appointments": <AppointmentIcon />,
 };
 
 const METRIC_COLORS: Record<string, string> = {
@@ -66,13 +72,19 @@ const METRIC_COLORS: Record<string, string> = {
   "Number of Trusted Patients": "#1565C0",
   "Recovery Rating of Facilities": "#00897B",
   "My Scheduled Appointments": "#7B1FA2",
+  "My Patients": "#1565C0",
+  "My Appointments": "#7B1FA2",
 };
+
+import StaffRegistrationModal from "../components/admin/StaffRegistrationModal";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
+  const [documents, setDocuments] = useState<DocumentMetadataResponse[]>([]);
   const [error, setError] = useState("");
+  const [openStaffModal, setOpenStaffModal] = useState(false);
 
   useEffect(() => {
     getDashboardSummary()
@@ -83,6 +95,9 @@ export default function Dashboard() {
       getPatientNotifications()
         .then(setNotifications)
         .catch(() => console.error("Unable to load notifications."));
+      getPatientDocuments()
+        .then(setDocuments)
+        .catch(() => console.error("Unable to load documents."));
     }
   }, [user]);
 
@@ -106,6 +121,11 @@ export default function Dashboard() {
         ["Recovery Rating of Facilities", "98.6%"],
         ["My Scheduled Appointments", summary.appointmentCount],
       ]
+    : user?.role === "DOCTOR"
+    ? [
+        ["My Patients", summary.patientCount],
+        ["My Appointments", summary.appointmentCount],
+      ]
     : [
         ["Patients", summary.patientCount],
         ["Appointments", summary.appointmentCount],
@@ -122,10 +142,20 @@ export default function Dashboard() {
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
         <TrendingUp color="primary" />
-        <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+        <Typography variant="h4" sx={{ fontWeight: "bold", flexGrow: 1 }}>
           Dashboard
         </Typography>
+        {user?.role === "ADMIN" && (
+          <Button variant="contained" onClick={() => setOpenStaffModal(true)}>
+            + Register Staff
+          </Button>
+        )}
       </Box>
+      <StaffRegistrationModal 
+        open={openStaffModal} 
+        onClose={() => setOpenStaffModal(false)} 
+        onSuccess={() => alert("Staff registered successfully! Refreshing dashboard...")} 
+      />
 
       {/* Patient Notifications Widget */}
       {user?.role === "PATIENT" && notifications.length > 0 && (
@@ -152,6 +182,48 @@ export default function Dashboard() {
                   {new Date(notif.createdAt).toLocaleString("en-IN")}
                 </Typography>
               </Alert>
+            ))}
+          </Box>
+        </Box>
+      )}
+
+      {/* Patient Documents Widget */}
+      {user?.role === "PATIENT" && documents.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 600, display: "flex", alignItems: "center", gap: 1 }}>
+            📄 My Medical Documents
+          </Typography>
+          <Box sx={{ display: "grid", gap: 1.5 }}>
+            {documents.map((doc) => (
+              <Paper 
+                key={doc.id} 
+                sx={{ 
+                  p: 2, 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "space-between",
+                  borderRadius: 2,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.04)"
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+                    {doc.documentName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {doc.fileType} • Uploaded by {doc.uploadedBy} on {new Date(doc.timestamp).toLocaleDateString("en-IN")}
+                  </Typography>
+                </Box>
+                <Button 
+                  variant="outlined" 
+                  size="small" 
+                  startIcon={<DownloadIcon />} 
+                  href={doc.downloadUrl}
+                  target="_blank"
+                >
+                  Download
+                </Button>
+              </Paper>
             ))}
           </Box>
         </Box>
