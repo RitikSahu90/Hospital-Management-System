@@ -56,6 +56,8 @@ class DoctorServiceTest {
         request.setLastName("Kumar");
         request.setLicenseNumber("LIC-1");
         request.setSpecialization("Neurology");
+        request.setDepartmentId(1L);
+        request.setUserId(2L);
 
         Doctor entity = Doctor.builder().id(3L).firstName("Neha").lastName("Kumar").licenseNumber("LIC-1").specialization("Neurology").build();
         DoctorResponse response = new DoctorResponse(3L, null, null, null, "Neha", "Kumar", "LIC-1", "Neurology", null, null, null, null);
@@ -82,6 +84,8 @@ class DoctorServiceTest {
         request.setSpecialization("Neurology");
         request.setPhone("9876543210");
         request.setConsultationFee(500.0);
+        request.setDepartmentId(1L);
+        request.setUserId(2L);
 
         Doctor existing = Doctor.builder().id(3L).firstName("Old").lastName("Name").licenseNumber("LIC-1").specialization("Old").build();
         DoctorResponse response = new DoctorResponse(3L, null, null, null, "Neha", "Kumar", "LIC-1", "Neurology", "9876543210", null, 500.0, null);

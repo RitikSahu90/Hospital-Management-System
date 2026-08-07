@@ -7,7 +7,6 @@ import lombok.Data;
 
 @Data
 public class DoctorRequest {
-    @NotNull
     private Long userId;
 
     @NotNull

@@ -54,6 +54,21 @@ public class DashboardServiceImpl implements DashboardService {
             return new DashboardResponse(patientCount, 1L, appointments.size(), revenue, statuses);
         }
 
+        if (authentication != null && authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_PATIENT"))) {
+            String username = authentication.getName();
+            hospital.management.backend.entity.Patient patient = patientRepository.findByUserUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("Patient profile not found"));
+            
+            var appointments = appointmentRepository.findAll().stream()
+                    .filter(app -> app.getPatient() != null && app.getPatient().getId().equals(patient.getId()))
+                    .toList();
+            
+            Map<String, Long> statuses = Arrays.stream(AppointmentStatus.values())
+                    .collect(Collectors.toMap(Enum::name, status -> appointments.stream().filter(appointment -> appointment.getStatus() == status).count()));
+            
+            return new DashboardResponse(1L, doctorRepository.count(), appointments.size(), BigDecimal.ZERO, statuses);
+        }
+
         var appointments = appointmentRepository.findAll();
         Map<String, Long> statuses = Arrays.stream(AppointmentStatus.values()).collect(Collectors.toMap(Enum::name, status -> appointments.stream().filter(appointment -> appointment.getStatus() == status).count()));
         BigDecimal revenue = billingRepository.findAll().stream().map(bill -> bill.getTotalAmount() == null ? BigDecimal.ZERO : bill.getTotalAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);

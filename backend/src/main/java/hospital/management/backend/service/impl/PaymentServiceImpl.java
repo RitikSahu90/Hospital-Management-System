@@ -15,12 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
+import hospital.management.backend.repository.NotificationRepository;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final BillingRepository billingRepository;
+    private final NotificationRepository notificationRepository;
 
     @Override
     public PaymentResponse create(Long billId, PaymentRequest request) {
@@ -44,7 +47,21 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
         Payment saved = paymentRepository.save(payment);
         BigDecimal newPaid = paid.add(request.getAmount());
-        bill.setStatus(newPaid.compareTo(total) == 0 ? BillingStatus.PAID : BillingStatus.PARTIALLY_PAID);
+        if (newPaid.compareTo(total) == 0) {
+            bill.setStatus(BillingStatus.PAID);
+            
+            // Create notification for the patient
+            hospital.management.backend.entity.Notification notif = hospital.management.backend.entity.Notification.builder()
+                .patient(bill.getPatient())
+                .title("Bill Paid")
+                .message("Your bill #" + bill.getId() + " of amount " + total + " has been successfully paid.")
+                .createdAt(java.time.LocalDateTime.now())
+                .isRead(false)
+                .build();
+            notificationRepository.save(notif);
+        } else {
+            bill.setStatus(BillingStatus.PARTIALLY_PAID);
+        }
         billingRepository.save(bill);
         return toResponse(saved);
     }

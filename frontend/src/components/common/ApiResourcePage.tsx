@@ -19,10 +19,16 @@ import {
   TableRow,
   TextField,
   Typography,
+  MenuItem,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-export type FormField = { key: string; label: string; type?: "text" | "number" | "date" | "time" };
+export type FormField = { 
+  key: string; 
+  label: string; 
+  type?: "text" | "number" | "date" | "time" | "select";
+  options?: { label: string, value: string }[];
+};
 type Row = { id: number };
 
 // Fields whose value should be rendered as a colored status chip
@@ -228,13 +234,20 @@ export default function ApiResourcePage<T extends Row>({ title, fields, load, cr
             {fields.filter((field) => field.key !== "id").map((field) => (
               <TextField
                 key={field.key}
+                select={field.type === "select"}
                 label={field.label}
-                type={field.type ?? "text"}
-                value={values[field.key]}
+                type={field.type === "select" ? undefined : field.type ?? "text"}
+                value={values[field.key] ?? ""}
                 onChange={(event) => setValues((current) => ({ ...current, [field.key]: event.target.value }))}
                 slotProps={{ inputLabel: field.type === "date" || field.type === "time" ? { shrink: true } : undefined }}
                 fullWidth
-              />
+              >
+                {field.type === "select" && field.options?.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </TextField>
             ))}
           </Box>
         </DialogContent>

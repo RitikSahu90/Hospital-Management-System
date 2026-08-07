@@ -165,65 +165,27 @@ export default function LoginForm() {
           Demo Credentials
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-        <Chip
-          label="admin / admin123"
-          size="small"
-          color="primary"
-          variant="outlined"
-          onClick={() => {
-            setUsername("admin");
-            setPassword("admin123");
-          }}
-          sx={{ cursor: "pointer" }}
-        />
-
-        <Chip
-          label="doctor / doctor123"
-          size="small"
-          color="secondary"
-          variant="outlined"
-          onClick={() => {
-            setUsername("doctor");
-            setPassword("doctor123");
-          }}
-          sx={{ cursor: "pointer" }}
-        />
-
-        <Chip
-          label="receptionist / receptionist123"
-          size="small"
-          color="success"
-          variant="outlined"
-          onClick={() => {
-            setUsername("receptionist");
-            setPassword("receptionist123");
-          }}
-          sx={{ cursor: "pointer" }}
-        />
-
-        <Chip
-          label="pharmacist / pharmacist123"
-          size="small"
-          color="warning"
-          variant="outlined"
-          onClick={() => {
-            setUsername("pharmacist");
-            setPassword("pharmacist123");
-          }}
-          sx={{ cursor: "pointer" }}
-        />
-
-        <Chip
-          label="patient / patient123"
-          size="small"
-          color="info"
-          variant="outlined"
-          onClick={() => {
-            setUsername("patient");
-            setPassword("patient123");
-          }}
-          sx={{ cursor: "pointer" }}
-        />
+        {['admin', 'doctor', 'receptionist', 'pharmacist', 'patient'].map((role) => (
+          <Box key={role} sx={{ width: '100%', mb: 1 }}>
+            <Typography variant="caption" sx={{ fontWeight: 600, textTransform: 'capitalize' }}>{role}s:</Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
+              {[1, 2, 3, 4, 5].map((num) => (
+                <Chip
+                  key={`${role}${num}`}
+                  label={`${role}${num} / pass123`}
+                  size="small"
+                  color={role === 'admin' ? 'primary' : role === 'doctor' ? 'secondary' : role === 'receptionist' ? 'success' : role === 'pharmacist' ? 'warning' : 'info'}
+                  variant="outlined"
+                  onClick={() => {
+                    setUsername(`${role}${num}`);
+                    setPassword("pass123");
+                  }}
+                  sx={{ cursor: "pointer", fontSize: '0.7rem' }}
+                />
+              ))}
+            </Box>
+          </Box>
+        ))}
         </Box>
       </Paper>}
     </form>
